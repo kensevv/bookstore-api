@@ -16,12 +16,12 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
-    runtimeOnly("com.oracle.database.jdbc:ojdbc8:21.7.0.0")
-    jooqGenerator("com.oracle.database.jdbc:ojdbc8:21.7.0.0")
+    runtimeOnly("org.postgresql:postgresql:42.7.7")
+    jooqGenerator("org.postgresql:postgresql:42.7.7")
 }
 
 jooq {
-    version.set("3.19.12")
+    version.set("3.19.13")
 
     configurations {
         create("main") {
@@ -44,7 +44,7 @@ jooq {
                                 this.key = "xmlFile"
                                 this.value = "database/db-xml/information_schema.xml"
                             })
-                        excludes = "DATABASECHANGELOG|DATABASECHANGELOGLOCK" // liquibase tables
+                        excludes = "databasechangelog|databasechangeloglock" // liquibase tables
                     }
                     target.apply {
                         packageName = "com.lvlup.bookstore.jooq"
@@ -57,6 +57,7 @@ jooq {
             jooqConfiguration.apply {
                 generator.apply {
                     name = "org.jooq.codegen.XMLGenerator"
+                    onError = org.jooq.meta.jaxb.OnError.LOG
                     generate.apply {
                         withRelations(true)
                         withDeprecated(false)
@@ -68,23 +69,22 @@ jooq {
                         withNonnullAnnotationType("org.jetbrains.annotations.NotNull")
                     }
                     database.apply {
-                        withInputSchema("BOOKSTORE")
-                        forcedTypes.apply {
-                            add(
+                        name = "org.jooq.meta.postgres.PostgresDatabase"
+                        withInputSchema("bookstore")
+                        includes = ".*"
+                        excludes = "databasechangelog|databasechangeloglock"
+                        forcedTypes.addAll(
+                            listOf(
                                 ForcedType().apply {
-                                    this.name = "numeric"
-                                    this.sql =
-                                        """select col.owner || '.' || col.TABLE_NAME || '.' || col.column_name from all_tab_cols col where col.owner = 'BOOKSTORE' and col.DATA_TYPE = 'NUMBER' """
-                                }
-                            )
-                            add(
+                                    name = "varchar"
+                                    includeTypes = "character varying|varchar"
+                                },
                                 ForcedType().apply {
-                                    this.name = "varchar"
-                                    this.sql =
-                                        """select col.owner || '.' || col.TABLE_NAME || '.' || col.column_name from all_tab_cols col where col.owner = 'BOOKSTORE' and col.DATA_TYPE = 'VARCHAR2' """
-                                }
+                                    name = "timestamp"
+                                    includeTypes = "timestamp.*"
+                                },
                             )
-                        }
+                        )
                     }
                     target.apply {
                         packageName = "db-xml"
@@ -92,9 +92,9 @@ jooq {
                     }
                 }
                 jdbc.apply {
-                    driver = "oracle.jdbc.driver.OracleDriver"
-                    url = System.getenv("DB_BOOKSTORE_URL") ?: "jdbc:oracle:thin:@localhost:1522/FREEPDB1"
-                    user = System.getenv("DB_BOOKSTORE_USERNAME") ?: "BOOKSTORE"
+                    driver = "org.postgresql.Driver"
+                    url = System.getenv("DB_BOOKSTORE_URL") ?: "jdbc:postgresql://localhost:5432/bookstore"
+                    user = System.getenv("DB_BOOKSTORE_USERNAME") ?: "bookstore"
                     password = System.getenv("DB_BOOKSTORE_PASSWORD") ?: "bookstore123"
                 }
             }

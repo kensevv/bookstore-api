@@ -5,7 +5,6 @@ import com.lvlup.backend.model.UserRole
 import com.lvlup.bookstore.jooq.tables.Users.Companion.USERS
 import com.lvlup.bookstore.jooq.tables.records.UsersRecord
 import org.jooq.DSLContext
-import org.jooq.InsertValuesStepN
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 import kotlin.String
@@ -39,7 +38,7 @@ class UserRepository(private var db: DSLContext) {
             role = UserRole.valueOf(this.role!!),
             createdAt = currentTime,
             updatedAt = currentTime,
-            deleted = this.deleted == "Y"
+            deleted = this.deleted!!
         )
     }
 }

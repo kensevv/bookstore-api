@@ -1,23 +1,22 @@
 version: '3.8'
 services:
-  oracle-db:
-    image: gvenzl/oracle-free:23-slim
-    container_name: bookstore-oracle
+  postgres-db:
+    image: postgres:15
+    container_name: bookstore-postgres
     environment:
-      - ORACLE_PASSWORD=bookstore123
-      - APP_USER=bookstore
-      - APP_USER_PASSWORD=bookstore123
+      - POSTGRES_DB=bookstore
+      - POSTGRES_USER=bookstore
+      - POSTGRES_PASSWORD=bookstore123
     ports:
-      - "1522:1521"  # Using different port to avoid conflict
+      - "5432:5432"
     volumes:
-      - oracle_data:/opt/oracle/oradata
-      - ./database/init-scripts:/container-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD", "healthcheck.sh"]
-      start_period: 30s
+      test: ["CMD-SHELL", "pg_isready -U bookstore"]
       interval: 10s
-      timeout: 10s
-      retries: 10
+      timeout: 5s
+      retries: 5
 
 volumes:
-  oracle_data:
+  postgres_data:

@@ -25,9 +25,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    runtimeOnly("com.oracle.database.jdbc:ojdbc8")
-    implementation("org.jooq:jooq:3.19.12")
-    implementation("org.jooq:jooq-kotlin:3.19.12")
+//    runtimeOnly("com.oracle.database.jdbc:ojdbc8")
+    runtimeOnly("org.postgresql:postgresql:42.7.7")
+
+    implementation("org.jooq:jooq:3.19.13")
+    implementation("org.jooq:jooq-kotlin:3.19.13")
 
     implementation("org.liquibase:liquibase-core")
 
@@ -48,8 +50,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.mockk:mockk:1.13.9")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
-    implementation("org.springdoc:springdoc-openapi-starter-common:2.3.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+    implementation("org.springdoc:springdoc-openapi-starter-common:2.8.13")
 }
 
 tasks.withType<KotlinCompile> {
