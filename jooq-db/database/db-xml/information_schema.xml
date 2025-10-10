@@ -301,7 +301,7 @@
             <table_catalog></table_catalog>
             <table_schema>BOOKSTORE</table_schema>
             <table_name>USERS</table_name>
-            <column_name>PASSWORD</column_name>
+            <column_name>PASSWORD_HASH</column_name>
             <data_type>varchar</data_type>
             <character_maximum_length>0</character_maximum_length>
             <numeric_precision>0</numeric_precision>
@@ -329,84 +329,42 @@
             <table_catalog></table_catalog>
             <table_schema>BOOKSTORE</table_schema>
             <table_name>USERS</table_name>
+            <column_name>CREATED_AT</column_name>
+            <data_type>timestamp</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>6</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>4</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>BOOKSTORE</table_schema>
+            <table_name>USERS</table_name>
+            <column_name>UPDATED_AT</column_name>
+            <data_type>timestamp</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>6</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>5</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>BOOKSTORE</table_schema>
+            <table_name>USERS</table_name>
             <column_name>DELETED</column_name>
             <data_type>char</data_type>
             <character_maximum_length>1</character_maximum_length>
             <numeric_precision>0</numeric_precision>
             <numeric_scale>0</numeric_scale>
-            <ordinal_position>4</ordinal_position>
+            <ordinal_position>6</ordinal_position>
             <is_nullable>false</is_nullable>
             <column_default>'''N'' '</column_default>
-            <comment></comment>
-            <readonly>false</readonly>
-        </column>
-        <column>
-            <table_catalog></table_catalog>
-            <table_schema>BOOKSTORE</table_schema>
-            <table_name>USERS</table_name>
-            <column_name>DELETED_AS</column_name>
-            <data_type>numeric</data_type>
-            <character_maximum_length>0</character_maximum_length>
-            <numeric_precision>0</numeric_precision>
-            <numeric_scale>0</numeric_scale>
-            <ordinal_position>5</ordinal_position>
-            <is_nullable>true</is_nullable>
-            <comment></comment>
-            <readonly>false</readonly>
-        </column>
-        <column>
-            <table_catalog></table_catalog>
-            <table_schema>BOOKSTORE</table_schema>
-            <table_name>USERS</table_name>
-            <column_name>ASDASDAS</column_name>
-            <data_type>varchar</data_type>
-            <character_maximum_length>0</character_maximum_length>
-            <numeric_precision>0</numeric_precision>
-            <numeric_scale>0</numeric_scale>
-            <ordinal_position>6</ordinal_position>
-            <is_nullable>true</is_nullable>
-            <comment></comment>
-            <readonly>false</readonly>
-        </column>
-        <column>
-            <table_catalog></table_catalog>
-            <table_schema>BOOKSTORE</table_schema>
-            <table_name>USERS</table_name>
-            <column_name>DSA</column_name>
-            <data_type>numeric</data_type>
-            <character_maximum_length>0</character_maximum_length>
-            <numeric_precision>0</numeric_precision>
-            <numeric_scale>0</numeric_scale>
-            <ordinal_position>7</ordinal_position>
-            <is_nullable>true</is_nullable>
-            <comment></comment>
-            <readonly>false</readonly>
-        </column>
-        <column>
-            <table_catalog></table_catalog>
-            <table_schema>BOOKSTORE</table_schema>
-            <table_name>USERS</table_name>
-            <column_name>GHFD</column_name>
-            <data_type>numeric</data_type>
-            <character_maximum_length>0</character_maximum_length>
-            <numeric_precision>0</numeric_precision>
-            <numeric_scale>0</numeric_scale>
-            <ordinal_position>8</ordinal_position>
-            <is_nullable>true</is_nullable>
-            <comment></comment>
-            <readonly>false</readonly>
-        </column>
-        <column>
-            <table_catalog></table_catalog>
-            <table_schema>BOOKSTORE</table_schema>
-            <table_name>USERS</table_name>
-            <column_name>SGFDDF</column_name>
-            <data_type>numeric</data_type>
-            <character_maximum_length>0</character_maximum_length>
-            <numeric_precision>0</numeric_precision>
-            <numeric_scale>0</numeric_scale>
-            <ordinal_position>9</ordinal_position>
-            <is_nullable>true</is_nullable>
             <comment></comment>
             <readonly>false</readonly>
         </column>
@@ -420,6 +378,7 @@
             <table_catalog></table_catalog>
             <table_schema>BOOKSTORE</table_schema>
             <table_name>DATABASECHANGELOGLOCK</table_name>
+            <comment></comment>
             <enforced>true</enforced>
         </table_constraint>
         <table_constraint>
@@ -430,6 +389,7 @@
             <table_catalog></table_catalog>
             <table_schema>BOOKSTORE</table_schema>
             <table_name>USERS</table_name>
+            <comment></comment>
             <enforced>true</enforced>
         </table_constraint>
     </table_constraints>

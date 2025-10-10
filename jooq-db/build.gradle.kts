@@ -20,8 +20,9 @@ dependencies {
     jooqGenerator("com.oracle.database.jdbc:ojdbc8:21.7.0.0")
 }
 
-
 jooq {
+    version.set("3.19.12")
+
     configurations {
         create("main") {
             generateSchemaSourceOnCompilation.set(true)

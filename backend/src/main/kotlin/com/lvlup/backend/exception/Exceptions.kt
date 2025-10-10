@@ -1,0 +1,11 @@
+package com.lvlup.backend.exception
+
+// Base exception
+sealed class BookstoreException(message: String) : RuntimeException(message)
+
+
+// Authentication exceptions
+class InvalidCredentialsException(message: String = "Invalid email or password") : BookstoreException(message)
+class UserAlreadyExistsException(message: String = "User with this email already exists") : BookstoreException(message)
+class InvalidTokenException(message: String = "Invalid or expired token") : BookstoreException(message)
+class UnauthorizedAccessException(message: String = "Unauthorized access") : BookstoreException(message)

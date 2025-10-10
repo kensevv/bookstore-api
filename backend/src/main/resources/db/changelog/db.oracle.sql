@@ -3,13 +3,10 @@
 -- changeset create-user-table:1
 CREATE TABLE users
 (
-    username VARCHAR2(255) PRIMARY KEY,
-    password VARCHAR2(255)       NOT NULL,
-    role     VARCHAR2(20)        NOT NULL,
-    deleted  CHAR(1) DEFAULT 'N' not null,
-    deleted_as number(1),
-    asdasdas varchar(2),
-    dsa NUMBER,
-    ghfd NUMBER(2,2),
-    sgfddf INT
+    USERNAME      VARCHAR2(255) PRIMARY KEY,
+    PASSWORD_HASH VARCHAR2(255)       NOT NULL,
+    ROLE          VARCHAR2(20)        NOT NULL,
+    CREATED_AT    TIMESTAMP           NOT NULL,
+    UPDATED_AT    TIMESTAMP           NOT NULL,
+    DELETED       CHAR(1) DEFAULT 'N' NOT NULL
 );
