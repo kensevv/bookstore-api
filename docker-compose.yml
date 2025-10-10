@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  oracle-db:
+    image: gvenzl/oracle-free:23-slim
+    container_name: bookstore-oracle
+    environment:
+      - ORACLE_PASSWORD=bookstore123
+      - APP_USER=bookstore
+      - APP_USER_PASSWORD=bookstore123
+    ports:
+      - "1522:1521"  # Using different port to avoid conflict
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+      - ./database/init-scripts:/container-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+volumes:
+  oracle_data:
