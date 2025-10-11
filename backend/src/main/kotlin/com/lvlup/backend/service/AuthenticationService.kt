@@ -6,6 +6,8 @@ import com.lvlup.backend.exception.UserAlreadyExistsException
 import com.lvlup.backend.dto.AuthJwtResponse
 import com.lvlup.backend.dto.LoginRequest
 import com.lvlup.backend.dto.RegisterRequest
+import com.lvlup.backend.dto.UserResponse
+import com.lvlup.backend.exception.UserNotFoundException
 import com.lvlup.backend.model.UserRole
 import com.lvlup.backend.repository.UserRepository
 import com.lvlup.backend.security.jwt.JwtTokenProvider
@@ -28,21 +30,29 @@ class AuthenticationService(
 ) {
     private val logger = KotlinLogging.logger {}
 
+    fun getCurrentUser(): User {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userPrincipal = authentication.principal as UserDetailsImpl
+
+        return userRepository.findByEmail(userPrincipal.username)
+            ?: throw UserNotFoundException("User not found with email: ${userPrincipal.username}")
+    }
+
     fun login(request: LoginRequest): AuthJwtResponse {
-        logger.debug { "Login attempt for user: ${request.username}" }
+        logger.debug { "Login attempt for user: ${request.email}" }
 
         val authentication = runCatching {
             authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken(request.username, request.password)
+                UsernamePasswordAuthenticationToken(request.email, request.password)
             )
         }.onFailure { ex ->
             when (ex) {
                 is AuthenticationException -> {
-                    logger.debug { "Invalid credentials for ${request.username}" }
-                    throw InvalidCredentialsException("Invalid username or password")
+                    logger.debug { "Invalid credentials for ${request.email}" }
+                    throw InvalidCredentialsException("Invalid email or password")
                 }
 
-                else -> logger.error(ex) { "Unexpected error during login for ${request.username}" }
+                else -> logger.error(ex) { "Unexpected error during login for ${request.email}" }
             }
         }.getOrThrow()
 
@@ -52,34 +62,37 @@ class AuthenticationService(
         val token = jwtTokenProvider.generateToken(userPrincipal)
         val refreshToken = jwtTokenProvider.generateToken(userPrincipal, isRefreshToken = true)
 
-        logger.debug { "User logged in successfully: ${request.username}" }
+        logger.debug { "User logged in successfully: ${request.email}" }
 
         return AuthJwtResponse(
             token = token,
             refreshToken = refreshToken,
-            username = userPrincipal.username,
-            role = userPrincipal.getUserRole(),
+            user = UserResponse(userPrincipal)
         )
     }
 
     fun registerNewUser(request: RegisterRequest): AuthJwtResponse {
-        logger.debug { "Attempting to register user with username: ${request.username}" }
+        logger.debug { "Attempting to register user with email: ${request.email}" }
 
-        if(userRepository.existsByUsername(request.username)) {
-            logger.debug { "Registration failed: Email already exists - ${request.username}" }
-            throw UserAlreadyExistsException("User with username ${request.username} already exists")
+        if (userRepository.existsByEmail(request.email)) {
+            logger.debug { "Registration failed: Email already exists - ${request.email}" }
+            throw UserAlreadyExistsException("User with email ${request.email} already exists")
         }
 
+
+        val createdTimestamp = LocalDateTime.now()
         val newUser = User(
-            username = request.username,
+            email = request.email,
+            firstName = request.firstName,
+            lastName = request.lastName,
             passwordHash = passwordEncoder.encode(request.password),
             role = UserRole.ROLE_USER,
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now(),
+            createdAt = createdTimestamp,
+            updatedAt = createdTimestamp,
         )
 
         userRepository.createUser(newUser)
-        logger.info("User: ${newUser.username} registered successfully.")
+        logger.info("User: ${newUser.email} registered successfully.")
 
         val userPrincipal = UserDetailsImpl(newUser)
         val token = jwtTokenProvider.generateToken(userPrincipal)
@@ -88,8 +101,7 @@ class AuthenticationService(
         return AuthJwtResponse(
             token = token,
             refreshToken = refreshToken,
-            username = newUser.username,
-            role = newUser.role,
+            user = UserResponse(userPrincipal)
         )
     }
 

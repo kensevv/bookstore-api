@@ -12,7 +12,7 @@ data class UserDetailsImpl(private val user: User) : UserDetails {
 
     override fun getPassword(): String = user.passwordHash
 
-    override fun getUsername(): String = user.username
+    override fun getUsername(): String = user.email
 
     override fun isAccountNonExpired(): Boolean = true
 
@@ -23,4 +23,7 @@ data class UserDetailsImpl(private val user: User) : UserDetails {
     override fun isEnabled(): Boolean = !user.deleted
 
     fun getUserRole(): UserRole = user.role
+
+    fun getFirstName(): String = user.firstName
+    fun getLastName(): String = user.lastName
 }

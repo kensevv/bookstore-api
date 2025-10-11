@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service
 class UserDetailsServiceImpl(private val userRepository: UserRepository) : UserDetailsService {
     private val logger = KotlinLogging.logger {}
 
-    override fun loadUserByUsername(username: String): UserDetailsImpl {
-        logger.debug { "Loading user by username: $username" }
-        val user = userRepository.findByUsername(username)
-            ?: throw UsernameNotFoundException("User not found with username: $username")
+    override fun loadUserByUsername(email: String): UserDetailsImpl {
+        logger.debug { "Loading user by email: $email" }
+        val user = userRepository.findByEmail(email)
+            ?: throw UsernameNotFoundException("User not found with email: $email")
         return UserDetailsImpl(user)
     }
 }

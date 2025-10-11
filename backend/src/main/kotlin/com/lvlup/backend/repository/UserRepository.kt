@@ -12,13 +12,15 @@ import kotlin.String
 @Repository
 class UserRepository(private var db: DSLContext) {
 
-    fun findByUsername(username: String): User? = fetchOneUserRecordByUsername(username)?.mapToUser()
+    fun findByEmail(email: String): User? = fetchOneUserRecordByEmail(email)?.mapToUser()
 
-    fun existsByUsername(username: String): Boolean = fetchOneUserRecordByUsername(username) != null
+    fun existsByEmail(email: String): Boolean = fetchOneUserRecordByEmail(email) != null
 
     fun createUser(user: User): Int {
         val record = db.newRecord(USERS).apply {
-            username = user.username
+            email = user.email
+            firstName = user.firstName
+            lastName = user.lastName
             passwordHash = user.passwordHash
             createdAt = user.createdAt
             updatedAt = user.updatedAt
@@ -27,18 +29,37 @@ class UserRepository(private var db: DSLContext) {
         return record.store()
     }
 
-    private fun fetchOneUserRecordByUsername(username: String) =
-        db.fetchOne(USERS, USERS.USERNAME.eq(username))
-
-    private fun UsersRecord.mapToUser(): User {
-        val currentTime = LocalDateTime.now()
-        return User(
-            username = this.username!!,
-            passwordHash = this.passwordHash!!,
-            role = UserRole.valueOf(this.role!!),
-            createdAt = currentTime,
-            updatedAt = currentTime,
-            deleted = this.deleted!!
-        )
+    fun updatePassword(userEmail: String, newPasswordHash: String): Int? {
+        return fetchOneUserRecordByEmail(userEmail)?.apply {
+            passwordHash = newPasswordHash
+            updatedAt = LocalDateTime.now()
+        }?.update()
     }
+
+    fun updateUserProfile(userEmail: String, newFirstName: String, newLastName: String): User? {
+        val updatedUserResponse = fetchOneUserRecordByEmail(userEmail)?.apply {
+            firstName = newFirstName
+            lastName = newLastName
+            updatedAt = LocalDateTime.now()
+        }.let { updatedRecord ->
+            updatedRecord?.update()
+            updatedRecord?.mapToUser()
+        }
+        return updatedUserResponse
+    }
+
+    private fun fetchOneUserRecordByEmail(email: String) =
+        db.fetchOne(USERS, USERS.EMAIL.eq(email))
+
+    private fun UsersRecord.mapToUser(): User = User(
+        email = this.email!!,
+        firstName = this.firstName!!,
+        lastName = this.lastName!!,
+        passwordHash = this.passwordHash!!,
+        role = UserRole.valueOf(this.role!!),
+        createdAt = this.createdAt!!,
+        updatedAt = this.updatedAt!!,
+        deleted = this.deleted!!
+    )
+
 }

@@ -21,7 +21,7 @@
             <table_catalog></table_catalog>
             <table_schema>bookstore</table_schema>
             <table_name>users</table_name>
-            <column_name>username</column_name>
+            <column_name>email</column_name>
             <data_type>varchar</data_type>
             <character_maximum_length>0</character_maximum_length>
             <numeric_precision>0</numeric_precision>
@@ -35,7 +35,7 @@
             <table_catalog></table_catalog>
             <table_schema>bookstore</table_schema>
             <table_name>users</table_name>
-            <column_name>password_hash</column_name>
+            <column_name>first_name</column_name>
             <data_type>varchar</data_type>
             <character_maximum_length>0</character_maximum_length>
             <numeric_precision>0</numeric_precision>
@@ -49,7 +49,7 @@
             <table_catalog></table_catalog>
             <table_schema>bookstore</table_schema>
             <table_name>users</table_name>
-            <column_name>role</column_name>
+            <column_name>last_name</column_name>
             <data_type>varchar</data_type>
             <character_maximum_length>0</character_maximum_length>
             <numeric_precision>0</numeric_precision>
@@ -63,8 +63,8 @@
             <table_catalog></table_catalog>
             <table_schema>bookstore</table_schema>
             <table_name>users</table_name>
-            <column_name>created_at</column_name>
-            <data_type>timestamp</data_type>
+            <column_name>password_hash</column_name>
+            <data_type>varchar</data_type>
             <character_maximum_length>0</character_maximum_length>
             <numeric_precision>0</numeric_precision>
             <numeric_scale>0</numeric_scale>
@@ -77,8 +77,8 @@
             <table_catalog></table_catalog>
             <table_schema>bookstore</table_schema>
             <table_name>users</table_name>
-            <column_name>updated_at</column_name>
-            <data_type>timestamp</data_type>
+            <column_name>role</column_name>
+            <data_type>varchar</data_type>
             <character_maximum_length>0</character_maximum_length>
             <numeric_precision>0</numeric_precision>
             <numeric_scale>0</numeric_scale>
@@ -91,12 +91,42 @@
             <table_catalog></table_catalog>
             <table_schema>bookstore</table_schema>
             <table_name>users</table_name>
+            <column_name>created_at</column_name>
+            <data_type>timestamp</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>0</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>6</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <column_default>CURRENT_TIMESTAMP</column_default>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>users</table_name>
+            <column_name>updated_at</column_name>
+            <data_type>timestamp</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>0</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>7</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <column_default>CURRENT_TIMESTAMP</column_default>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>users</table_name>
             <column_name>deleted</column_name>
             <data_type>boolean</data_type>
             <character_maximum_length>0</character_maximum_length>
             <numeric_precision>0</numeric_precision>
             <numeric_scale>0</numeric_scale>
-            <ordinal_position>6</ordinal_position>
+            <ordinal_position>8</ordinal_position>
             <is_nullable>false</is_nullable>
             <column_default>false</column_default>
             <comment></comment>
@@ -118,7 +148,7 @@
     </table_constraints>
     <key_column_usages>
         <key_column_usage>
-            <column_name>username</column_name>
+            <column_name>email</column_name>
             <constraint_catalog></constraint_catalog>
             <constraint_schema>bookstore</constraint_schema>
             <constraint_name>users_pkey</constraint_name>

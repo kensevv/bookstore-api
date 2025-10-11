@@ -46,19 +46,19 @@ class JwtTokenProvider(
             if (isRefreshToken) jwtRefreshExpirationMs.toLong() else jwtExpirationMs.toLong()
         )
 
-    fun getUsernameFromToken(token: String): String = runCatching {
+    fun getEmailFromToken(token: String): String = runCatching {
         getAllClaimsFromToken(token).subject
     }.getOrElse { ex ->
-        logger.error("Failed to extract username from token", ex)
+        logger.error("Failed to extract email from token", ex)
         throw InvalidTokenException("Invalid token")
     }
 
-    private fun doGenerateToken(claims: Map<String, Any>, username: String, expirationTime: Long): String {
+    private fun doGenerateToken(claims: Map<String, Any>, email: String, expirationTime: Long): String {
         val createdDate = LocalDateTime.now()
         val expirationDate = createdDate.plusSeconds(expirationTime)
         return Jwts.builder()
             .setClaims(claims)
-            .setSubject(username)
+            .setSubject(email)
             .setIssuedAt(Date.from(createdDate.atZone(ZoneId.systemDefault()).toInstant()))
             .setExpiration(Date.from(expirationDate.atZone(ZoneId.systemDefault()).toInstant()))
             .signWith(key.value)

@@ -7,10 +7,12 @@ enum class UserRole {
 }
 
 data class User(
-    val username: String,
+    val email: String,
+    val firstName: String,
+    val lastName: String,
     val passwordHash: String,
     val role: UserRole,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
-    val deleted: Boolean = false,
+    val deleted: Boolean = false
 )

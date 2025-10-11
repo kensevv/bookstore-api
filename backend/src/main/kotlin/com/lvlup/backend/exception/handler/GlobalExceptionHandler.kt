@@ -1,5 +1,7 @@
-package com.lvlup.backend.exception
+package com.lvlup.backend.exception.handler
 
+import com.lvlup.backend.dto.ApiResponseFactory
+import com.lvlup.backend.dto.ErrorResponse
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -8,7 +10,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.context.request.WebRequest
-import java.time.LocalDateTime
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -21,12 +22,11 @@ class GlobalExceptionHandler {
         request: WebRequest
     ): ResponseEntity<ErrorResponse> {
         logger.error("Unexpected error occurred", ex)
-        val errorResponse = ErrorResponse(
-            timestamp = LocalDateTime.now(),
-            status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            error = "Internal Server Error",
+        val errorResponse = ApiResponseFactory.error(
+            status = HttpStatus.INTERNAL_SERVER_ERROR,
             message = "An unexpected error occurred. Please try again later.",
-            path = request.getDescription(false).removePrefix("uri=")
+            error = "Internal Server Error",
+            path = request.getDescription(false)
         )
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse)
     }
@@ -43,16 +43,15 @@ class GlobalExceptionHandler {
             fieldName to errorMessage
         }
 
-        val errorResponse = ErrorResponse(
-            timestamp = LocalDateTime.now(),
-            status = HttpStatus.BAD_REQUEST.value(),
-            error = "Validation Failed",
+        val errorResponse = ApiResponseFactory.error(
+            status = HttpStatus.BAD_REQUEST,
             message = "Input validation failed",
-            path = request.getDescription(false).removePrefix("uri="),
+            error = ex.message,
+            path = request.getDescription(false),
             details = errors
         )
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }
-
 
 }
