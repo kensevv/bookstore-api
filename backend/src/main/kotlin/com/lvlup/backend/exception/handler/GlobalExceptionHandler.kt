@@ -2,6 +2,10 @@ package com.lvlup.backend.exception.handler
 
 import com.lvlup.backend.dto.ApiResponseFactory
 import com.lvlup.backend.dto.ErrorResponse
+import com.lvlup.backend.exception.BookstoreException
+import com.lvlup.backend.exception.DuplicateResourceException
+import com.lvlup.backend.exception.InvalidOperationException
+import com.lvlup.backend.exception.ResourceNotFoundException
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -54,4 +58,48 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }
 
+    @ExceptionHandler(DuplicateResourceException::class)
+    fun handleDuplicateResourceException(
+        ex: DuplicateResourceException,
+        request: WebRequest
+    ): ResponseEntity<ErrorResponse> {
+        logger.warn("Duplicate resource: ${ex.message}")
+        val errorResponse = ApiResponseFactory.error(
+            status = HttpStatus.CONFLICT,
+            message = "Resource already exists",
+            error = ex.message,
+            path = request.getDescription(false)
+        )
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse)
+    }
+
+    @ExceptionHandler(ResourceNotFoundException::class)
+    fun handleResourceNotFoundException(
+        ex: ResourceNotFoundException,
+        request: WebRequest
+    ): ResponseEntity<ErrorResponse> {
+        logger.warn("Resource not found: ${ex.message}")
+        val errorResponse = ApiResponseFactory.error(
+            status = HttpStatus.NOT_FOUND,
+            message = "Resource not found",
+            error = ex.message,
+            path = request.getDescription(false)
+        )
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
+    }
+
+    @ExceptionHandler(InvalidOperationException::class)
+    fun handleBusinessLogicException(
+        ex: BookstoreException,
+        request: WebRequest
+    ): ResponseEntity<ErrorResponse> {
+        logger.warn("Business logic error: ${ex.message}")
+        val errorResponse =  ApiResponseFactory.error(
+            status = HttpStatus.BAD_REQUEST,
+            message = "Invalid operation",
+            error = ex.message,
+            path = request.getDescription(false)
+        )
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
+    }
 }

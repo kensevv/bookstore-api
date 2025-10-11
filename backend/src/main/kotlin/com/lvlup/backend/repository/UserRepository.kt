@@ -6,6 +6,7 @@ import com.lvlup.bookstore.jooq.tables.Users.Companion.USERS
 import com.lvlup.bookstore.jooq.tables.records.UsersRecord
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import kotlin.String
 
@@ -16,6 +17,7 @@ class UserRepository(private var db: DSLContext) {
 
     fun existsByEmail(email: String): Boolean = fetchOneUserRecordByEmail(email) != null
 
+    @Transactional
     fun createUser(user: User): Int {
         val record = db.newRecord(USERS).apply {
             email = user.email
@@ -29,6 +31,7 @@ class UserRepository(private var db: DSLContext) {
         return record.store()
     }
 
+    @Transactional
     fun updatePassword(userEmail: String, newPasswordHash: String): Int? {
         return fetchOneUserRecordByEmail(userEmail)?.apply {
             passwordHash = newPasswordHash
@@ -36,6 +39,7 @@ class UserRepository(private var db: DSLContext) {
         }?.update()
     }
 
+    @Transactional
     fun updateUserProfile(userEmail: String, newFirstName: String, newLastName: String): User? {
         val updatedUserResponse = fetchOneUserRecordByEmail(userEmail)?.apply {
             firstName = newFirstName

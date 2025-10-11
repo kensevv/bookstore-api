@@ -6,11 +6,10 @@ import com.lvlup.backend.dto.UserResponse
 import com.lvlup.backend.exception.InvalidCredentialsException
 import com.lvlup.backend.exception.UserNotFoundException
 import com.lvlup.backend.repository.UserRepository
-import com.lvlup.backend.security.principle.UserDetailsImpl
 import mu.KotlinLogging
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserProfileService(
@@ -20,15 +19,11 @@ class UserProfileService(
 ) {
     private val logger = KotlinLogging.logger {}
 
+    fun getCurrentUserDto() = UserResponse(authenticationService.fetchCurrentlySignedInUser())
 
-    fun getCurrentUserDto(): UserResponse {
-        val authentication = SecurityContextHolder.getContext().authentication
-        val userPrincipal = authentication.principal as UserDetailsImpl
-        return UserResponse(userPrincipal)
-    }
-
+    @Transactional
     fun changePassword(changePasswordRequest: ChangePasswordRequest) {
-        val currentUser = authenticationService.getCurrentUser()
+        val currentUser = authenticationService.fetchCurrentlySignedInUser()
         logger.info("Password change request for user: ${currentUser.email}")
 
         if (!passwordEncoder.matches(changePasswordRequest.currentPassword, currentUser.passwordHash)) {
@@ -48,14 +43,16 @@ class UserProfileService(
         logger.info("Password changed successfully for user: ${currentUser.email}")
     }
 
+    @Transactional
     fun updateProfile(profileUpdateRequest: UpdateProfileRequest): UserResponse {
-        val currentUser = authenticationService.getCurrentUser()
+        val currentUser = authenticationService.fetchCurrentlySignedInUser()
 
         logger.info("Profile update request for user: ${currentUser.email}")
 
         val updatedUser = userRepository.updateUserProfile(
             currentUser.email,
-            profileUpdateRequest.firstName, profileUpdateRequest.lastName
+            profileUpdateRequest.firstName,
+            profileUpdateRequest.lastName
         ) ?: throw UserNotFoundException("User not found with email: ${currentUser.email}")
 
         logger.info("Profile updated successfully for user: ${currentUser.email}")

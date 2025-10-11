@@ -22,7 +22,6 @@ class UserProfileController(
     @GetMapping
     fun getCurrentUser(): ResponseEntity<SuccessResponse<UserResponse>> {
         val currentUser = userProfileService.getCurrentUserDto()
-
         return ResponseEntity.ok(ApiResponseFactory.success(currentUser))
     }
 

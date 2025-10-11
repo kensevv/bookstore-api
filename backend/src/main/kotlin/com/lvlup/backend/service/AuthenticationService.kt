@@ -30,7 +30,7 @@ class AuthenticationService(
 ) {
     private val logger = KotlinLogging.logger {}
 
-    fun getCurrentUser(): User {
+    fun fetchCurrentlySignedInUser(): User {
         val authentication = SecurityContextHolder.getContext().authentication
         val userPrincipal = authentication.principal as UserDetailsImpl
 

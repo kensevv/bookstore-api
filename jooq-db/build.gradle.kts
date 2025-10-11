@@ -77,7 +77,7 @@ jooq {
                             listOf(
                                 ForcedType().apply {
                                     name = "varchar"
-                                    includeTypes = "character varying|varchar"
+                                    includeTypes = "character varying|varchar|text"
                                 },
                                 ForcedType().apply {
                                     name = "timestamp"
