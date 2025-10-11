@@ -25,6 +25,20 @@
         <table>
             <table_catalog></table_catalog>
             <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts</table_name>
+            <table_type>BASE TABLE</table_type>
+            <comment></comment>
+        </table>
+        <table>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <table_type>BASE TABLE</table_type>
+            <comment></comment>
+        </table>
+        <table>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
             <table_name>users</table_name>
             <table_type>BASE TABLE</table_type>
             <comment></comment>
@@ -265,6 +279,152 @@
         <column>
             <table_catalog></table_catalog>
             <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts</table_name>
+            <column_name>id</column_name>
+            <data_type>bigint</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>64</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>1</ordinal_position>
+            <identity_generation>YES</identity_generation>
+            <is_nullable>false</is_nullable>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts</table_name>
+            <column_name>user_email</column_name>
+            <data_type>varchar</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>0</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>2</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts</table_name>
+            <column_name>created_at</column_name>
+            <data_type>timestamp</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>0</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>3</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <column_default>CURRENT_TIMESTAMP</column_default>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts</table_name>
+            <column_name>updated_at</column_name>
+            <data_type>timestamp</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>0</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>4</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <column_default>CURRENT_TIMESTAMP</column_default>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <column_name>id</column_name>
+            <data_type>bigint</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>64</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>1</ordinal_position>
+            <identity_generation>YES</identity_generation>
+            <is_nullable>false</is_nullable>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <column_name>cart_id</column_name>
+            <data_type>bigint</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>64</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>2</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <column_name>book_id</column_name>
+            <data_type>bigint</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>64</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>3</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <column_name>quantity</column_name>
+            <data_type>integer</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>32</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>4</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <column_name>created_at</column_name>
+            <data_type>timestamp</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>0</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>5</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <column_default>CURRENT_TIMESTAMP</column_default>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <column_name>updated_at</column_name>
+            <data_type>timestamp</data_type>
+            <character_maximum_length>0</character_maximum_length>
+            <numeric_precision>0</numeric_precision>
+            <numeric_scale>0</numeric_scale>
+            <ordinal_position>6</ordinal_position>
+            <is_nullable>false</is_nullable>
+            <column_default>CURRENT_TIMESTAMP</column_default>
+            <comment></comment>
+            <readonly>false</readonly>
+        </column>
+        <column>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
             <table_name>users</table_name>
             <column_name>email</column_name>
             <data_type>varchar</data_type>
@@ -415,11 +575,66 @@
         <table_constraint>
             <constraint_catalog></constraint_catalog>
             <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>shopping_carts_pkey</constraint_name>
+            <constraint_type>PRIMARY KEY</constraint_type>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts</table_name>
+            <comment></comment>
+            <enforced>true</enforced>
+        </table_constraint>
+        <table_constraint>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>shopping_carts_user_email_key</constraint_name>
+            <constraint_type>UNIQUE</constraint_type>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts</table_name>
+            <comment></comment>
+            <enforced>true</enforced>
+        </table_constraint>
+        <table_constraint>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>shopping_carts_items_pkey</constraint_name>
+            <constraint_type>PRIMARY KEY</constraint_type>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <comment></comment>
+            <enforced>true</enforced>
+        </table_constraint>
+        <table_constraint>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>uq_cart_items_cart_book</constraint_name>
+            <constraint_type>UNIQUE</constraint_type>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <comment></comment>
+            <enforced>true</enforced>
+        </table_constraint>
+        <table_constraint>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
             <constraint_name>users_pkey</constraint_name>
             <constraint_type>PRIMARY KEY</constraint_type>
             <table_catalog></table_catalog>
             <table_schema>bookstore</table_schema>
             <table_name>users</table_name>
+            <comment></comment>
+            <enforced>true</enforced>
+        </table_constraint>
+        <table_constraint>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>shopping_carts_items_quantity_check</constraint_name>
+            <constraint_type>CHECK</constraint_type>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
             <comment></comment>
             <enforced>true</enforced>
         </table_constraint>
@@ -456,6 +671,56 @@
             <table_name>categories</table_name>
         </key_column_usage>
         <key_column_usage>
+            <column_name>id</column_name>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>shopping_carts_pkey</constraint_name>
+            <ordinal_position>1</ordinal_position>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts</table_name>
+        </key_column_usage>
+        <key_column_usage>
+            <column_name>user_email</column_name>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>shopping_carts_user_email_key</constraint_name>
+            <ordinal_position>1</ordinal_position>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts</table_name>
+        </key_column_usage>
+        <key_column_usage>
+            <column_name>id</column_name>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>shopping_carts_items_pkey</constraint_name>
+            <ordinal_position>1</ordinal_position>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+        </key_column_usage>
+        <key_column_usage>
+            <column_name>cart_id</column_name>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>uq_cart_items_cart_book</constraint_name>
+            <ordinal_position>1</ordinal_position>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+        </key_column_usage>
+        <key_column_usage>
+            <column_name>book_id</column_name>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>uq_cart_items_cart_book</constraint_name>
+            <ordinal_position>2</ordinal_position>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+        </key_column_usage>
+        <key_column_usage>
             <column_name>email</column_name>
             <constraint_catalog></constraint_catalog>
             <constraint_schema>bookstore</constraint_schema>
@@ -466,6 +731,14 @@
             <table_name>users</table_name>
         </key_column_usage>
     </key_column_usages>
+    <check_constraints>
+        <check_constraint>
+            <constraint_catalog></constraint_catalog>
+            <constraint_schema>bookstore</constraint_schema>
+            <constraint_name>shopping_carts_items_quantity_check</constraint_name>
+            <check_clause>((quantity &gt; 0))</check_clause>
+        </check_constraint>
+    </check_constraints>
     <indexes>
         <index>
             <index_catalog></index_catalog>
@@ -484,6 +757,26 @@
             <table_catalog></table_catalog>
             <table_schema>bookstore</table_schema>
             <table_name>books</table_name>
+            <is_unique>false</is_unique>
+            <comment></comment>
+        </index>
+        <index>
+            <index_catalog></index_catalog>
+            <index_schema>bookstore</index_schema>
+            <index_name>idx_cart_items_book</index_name>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <is_unique>false</is_unique>
+            <comment></comment>
+        </index>
+        <index>
+            <index_catalog></index_catalog>
+            <index_schema>bookstore</index_schema>
+            <index_name>idx_cart_items_cart</index_name>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
             <is_unique>false</is_unique>
             <comment></comment>
         </index>
@@ -508,6 +801,28 @@
             <table_schema>bookstore</table_schema>
             <table_name>books</table_name>
             <column_name>title</column_name>
+            <ordinal_position>1</ordinal_position>
+            <is_descending>false</is_descending>
+        </index_column_usage>
+        <index_column_usage>
+            <index_catalog></index_catalog>
+            <index_schema>bookstore</index_schema>
+            <index_name>idx_cart_items_book</index_name>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <column_name>book_id</column_name>
+            <ordinal_position>1</ordinal_position>
+            <is_descending>false</is_descending>
+        </index_column_usage>
+        <index_column_usage>
+            <index_catalog></index_catalog>
+            <index_schema>bookstore</index_schema>
+            <index_name>idx_cart_items_cart</index_name>
+            <table_catalog></table_catalog>
+            <table_schema>bookstore</table_schema>
+            <table_name>shopping_carts_items</table_name>
+            <column_name>cart_id</column_name>
             <ordinal_position>1</ordinal_position>
             <is_descending>false</is_descending>
         </index_column_usage>

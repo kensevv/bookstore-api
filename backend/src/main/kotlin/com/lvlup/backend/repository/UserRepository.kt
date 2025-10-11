@@ -13,9 +13,9 @@ import kotlin.String
 @Repository
 class UserRepository(private var db: DSLContext) {
 
-    fun findByEmail(email: String): User? = fetchOneUserRecordByEmail(email)?.mapToUser()
+    fun findUserByEmail(email: String): User? = fetchOneUserRecordByEmail(email)?.mapToUser()
 
-    fun existsByEmail(email: String): Boolean = fetchOneUserRecordByEmail(email) != null
+    fun existsUserByEmail(email: String): Boolean = fetchOneUserRecordByEmail(email) != null
 
     @Transactional
     fun createUser(user: User): Int {

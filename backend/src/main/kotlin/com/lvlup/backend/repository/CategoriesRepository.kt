@@ -12,27 +12,27 @@ import java.time.LocalDateTime
 @Repository
 class CategoriesRepository(private val dsl: DSLContext) {
 
-    fun findById(id: Long): Category? {
+    fun findCategoryById(id: Long): Category? {
         return dsl.selectFrom(CATEGORIES)
             .where(CATEGORIES.ID.eq(id))
             .fetchOne()?.mapToCategory()
     }
 
-    fun findAll(): List<Category> {
+    fun findAllCategories(): List<Category> {
         return dsl.selectFrom(CATEGORIES)
             .orderBy(CATEGORIES.NAME.asc())
             .fetch()
             .map { it.mapToCategory() }
     }
 
-    fun existsByName(name: String): Boolean {
+    fun existsCategoryByName(name: String): Boolean {
         return dsl.fetchExists(
             dsl.selectFrom(CATEGORIES)
                 .where(CATEGORIES.NAME.eq(name))
         )
     }
 
-    fun existsByNameAndIdNot(name: String, id: Long): Boolean {
+    fun existsCategoryByNameAndIdNot(name: String, id: Long): Boolean {
         return dsl.fetchExists(
             dsl.selectFrom(CATEGORIES)
                 .where(CATEGORIES.NAME.eq(name).and(CATEGORIES.ID.ne(id)))
@@ -68,7 +68,7 @@ class CategoriesRepository(private val dsl: DSLContext) {
 
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    fun deleteById(id: Long) {
+    fun deleteCategoryById(id: Long) {
         dsl.deleteFrom(CATEGORIES)
             .where(CATEGORIES.ID.eq(id))
             .execute()

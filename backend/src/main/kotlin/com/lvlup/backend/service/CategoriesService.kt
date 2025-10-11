@@ -27,7 +27,7 @@ class CategoriesService(
     fun getCategoryById(id: Long): Category {
         logger.debug("Fetching category with ID: $id")
 
-        val category = categoriesRepository.findById(id)
+        val category = categoriesRepository.findCategoryById(id)
             ?: throw CategoryNotFoundException("Category not found with ID: $id")
 
         return category
@@ -36,7 +36,7 @@ class CategoriesService(
     @Transactional(readOnly = true)
     fun getAllCategories(): List<Category> {
         logger.debug("Fetching all categories")
-        return categoriesRepository.findAll()
+        return categoriesRepository.findAllCategories()
     }
 
     @Transactional
@@ -44,7 +44,7 @@ class CategoriesService(
     fun createCategory(createRequest: CategoryRequest): Category {
         logger.info("Creating new category: ${createRequest.name}")
 
-        if (categoriesRepository.existsByName(createRequest.name)) {
+        if (categoriesRepository.existsCategoryByName(createRequest.name)) {
             logger.warn("Category creation failed: Name already exists - ${createRequest.name}")
             throw DuplicateResourceException("Category with name '${createRequest.name}' already exists")
         }
@@ -68,10 +68,10 @@ class CategoriesService(
     fun updateCategory(id: Long, updateRequest: CategoryRequest): Category {
         logger.info("Updating category with ID: $id")
 
-        val existingCategory = categoriesRepository.findById(id)
+        val existingCategory = categoriesRepository.findCategoryById(id)
             ?: throw CategoryNotFoundException("Category not found with ID: $id")
 
-        if (categoriesRepository.existsByNameAndIdNot(updateRequest.name, id)) {
+        if (categoriesRepository.existsCategoryByNameAndIdNot(updateRequest.name, id)) {
             logger.warn("Category update failed: Name already exists - ${updateRequest.name}")
             throw DuplicateResourceException("Category with name '${updateRequest.name}' already exists")
         }
@@ -95,10 +95,10 @@ class CategoriesService(
     fun deleteCategory(categoryId: Long): Category {
         logger.info("Attempting to delete category with ID: $categoryId")
 
-        val category = categoriesRepository.findById(categoryId)
+        val category = categoriesRepository.findCategoryById(categoryId)
             ?: throw CategoryNotFoundException("Category not found with ID: $categoryId")
 
-        val bookCount = booksRepository.count(categoryId = categoryId)
+        val bookCount = booksRepository.getBooksCount(categoryId = categoryId)
 
         if (bookCount > 0) {
             logger.warn("Category deletion failed: Category ${category.name} has $bookCount associated books")
@@ -108,7 +108,7 @@ class CategoriesService(
             )
         }
 
-        categoriesRepository.deleteById(categoryId)
+        categoriesRepository.deleteCategoryById(categoryId)
         logger.info("Category deleted successfully with ID: $categoryId")
         return category
     }

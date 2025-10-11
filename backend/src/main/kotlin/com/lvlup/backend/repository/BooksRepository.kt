@@ -26,7 +26,7 @@ class BooksRepository(private val dsl: DSLContext) {
         .on(BOOKS.CATEGORY_ID.eq(CATEGORIES.ID))
         .where(BOOKS.DELETED.isFalse)
 
-    fun findById(id: Long): Book? {
+    fun findBookById(id: Long): Book? {
         return with(BOOKS) {
             getBookSelectConditionStep()
                 .and(ID.eq(id))
@@ -36,7 +36,7 @@ class BooksRepository(private val dsl: DSLContext) {
         }
     }
 
-    fun findAllPaginated(
+    fun findBooksPaginated(
         page: Int,
         size: Int,
         title: String?,
@@ -57,7 +57,7 @@ class BooksRepository(private val dsl: DSLContext) {
             .map { mapRecordToBookModel(it) }
     }
 
-    fun count(
+    fun getBooksCount(
         title: String? = null,
         author: String? = null,
         categoryId: Long? = null,
@@ -137,7 +137,7 @@ class BooksRepository(private val dsl: DSLContext) {
     }
 
     @Transactional
-    fun deleteById(id: Long) {
+    fun deleteBookById(id: Long) {
         dsl.update(BOOKS)
             .set(BOOKS.DELETED, true)
             .set(BOOKS.UPDATED_AT, LocalDateTime.now())
@@ -161,7 +161,7 @@ class BooksRepository(private val dsl: DSLContext) {
         )
     }
 
-    fun BooksRecord.mapToBook(category: Category): Book {
+    private fun BooksRecord.mapToBook(category: Category): Book {
         return Book(
             id = id,
             title = title!!,

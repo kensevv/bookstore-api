@@ -19,6 +19,7 @@ import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
@@ -30,14 +31,16 @@ class AuthenticationService(
 ) {
     private val logger = KotlinLogging.logger {}
 
+    @Transactional(readOnly = true)
     fun fetchCurrentlySignedInUser(): User {
         val authentication = SecurityContextHolder.getContext().authentication
         val userPrincipal = authentication.principal as UserDetailsImpl
 
-        return userRepository.findByEmail(userPrincipal.username)
+        return userRepository.findUserByEmail(userPrincipal.username)
             ?: throw UserNotFoundException("User not found with email: ${userPrincipal.username}")
     }
 
+    @Transactional
     fun login(request: LoginRequest): AuthJwtResponse {
         logger.debug { "Login attempt for user: ${request.email}" }
 
@@ -71,10 +74,11 @@ class AuthenticationService(
         )
     }
 
+    @Transactional
     fun registerNewUser(request: RegisterRequest): AuthJwtResponse {
         logger.debug { "Attempting to register user with email: ${request.email}" }
 
-        if (userRepository.existsByEmail(request.email)) {
+        if (userRepository.existsUserByEmail(request.email)) {
             logger.debug { "Registration failed: Email already exists - ${request.email}" }
             throw UserAlreadyExistsException("User with email ${request.email} already exists")
         }

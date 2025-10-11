@@ -24,7 +24,7 @@ class BookService(
     fun createBook(request: BookRequest): Book {
         logger.info("Creating new book: ${request.title}")
 
-        val selectedCategory = categoryRepository.findById(request.categoryId)
+        val selectedCategory = categoryRepository.findCategoryById(request.categoryId)
             ?: throw CategoryNotFoundException("Category not found with ID: ${request.categoryId}")
 
         val createdTimestamp = LocalDateTime.now()
@@ -52,10 +52,10 @@ class BookService(
     fun updateBook(id: Long, request: BookRequest): Book {
         logger.info("Updating book with ID: $id")
 
-        val existingBook = bookRepository.findById(id)
+        val existingBook = bookRepository.findBookById(id)
             ?: throw BookNotFoundException("Book not found with ID: $id")
 
-        val selectedCategory = categoryRepository.findById(request.categoryId)
+        val selectedCategory = categoryRepository.findCategoryById(request.categoryId)
             ?: throw CategoryNotFoundException("Category not found with ID: ${request.categoryId}")
 
         val updatedBook = existingBook.copy(
@@ -80,10 +80,10 @@ class BookService(
     fun deleteBook(id: Long) {
         logger.info("Deleting book with ID: $id")
 
-        bookRepository.findById(id)
+        bookRepository.findBookById(id)
             ?: throw BookNotFoundException("Book not found with ID: $id")
 
-        bookRepository.deleteById(id)
+        bookRepository.deleteBookById(id)
         logger.info("Book deleted successfully with ID: $id")
     }
 
@@ -91,7 +91,7 @@ class BookService(
     fun getBookById(id: Long): Book {
         logger.debug("Fetching book with ID: $id")
 
-        val book = bookRepository.findById(id)
+        val book = bookRepository.findBookById(id)
             ?: throw BookNotFoundException("Book not found with ID: $id")
 
         return book
@@ -112,7 +112,7 @@ class BookService(
         val validatedPage = maxOf(0, page)
         val validatedSize = minOf(maxOf(1, size), 100)
 
-        val books = bookRepository.findAllPaginated(
+        val books = bookRepository.findBooksPaginated(
             validatedPage,
             validatedSize,
             title?.trim(),
@@ -122,7 +122,7 @@ class BookService(
             maxPrice
         )
 
-        val totalElements = bookRepository.count(
+        val totalElements = bookRepository.getBooksCount(
             title?.trim(),
             author?.trim(),
             categoryId,

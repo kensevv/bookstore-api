@@ -4,6 +4,8 @@ import com.lvlup.backend.dto.ApiResponseFactory
 import com.lvlup.backend.dto.ErrorResponse
 import com.lvlup.backend.exception.BookstoreException
 import com.lvlup.backend.exception.DuplicateResourceException
+import com.lvlup.backend.exception.EmptyCartException
+import com.lvlup.backend.exception.InsufficientStockException
 import com.lvlup.backend.exception.InvalidOperationException
 import com.lvlup.backend.exception.ResourceNotFoundException
 import mu.KotlinLogging
@@ -49,8 +51,8 @@ class GlobalExceptionHandler {
 
         val errorResponse = ApiResponseFactory.error(
             status = HttpStatus.BAD_REQUEST,
-            message = "Input validation failed",
-            error = ex.message,
+            message = "Some fields failed validation, check details for more information.",
+            error = "Input validation failed",
             path = request.getDescription(false),
             details = errors
         )
@@ -88,13 +90,13 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
     }
 
-    @ExceptionHandler(InvalidOperationException::class)
+    @ExceptionHandler(InvalidOperationException::class, InsufficientStockException::class, EmptyCartException::class)
     fun handleBusinessLogicException(
         ex: BookstoreException,
         request: WebRequest
     ): ResponseEntity<ErrorResponse> {
         logger.warn("Business logic error: ${ex.message}")
-        val errorResponse =  ApiResponseFactory.error(
+        val errorResponse = ApiResponseFactory.error(
             status = HttpStatus.BAD_REQUEST,
             message = "Invalid operation",
             error = ex.message,
