@@ -3,8 +3,6 @@ package com.lvlup.backend.exception
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -17,37 +15,20 @@ class GlobalExceptionHandler {
 
     private val logger = KotlinLogging.logger {}
 
-
-    @ExceptionHandler(InvalidCredentialsException::class, BadCredentialsException::class)
-    fun handleInvalidCredentialsException(
+    @ExceptionHandler(Exception::class)
+    fun handleGlobalException(
         ex: Exception,
         request: WebRequest
     ): ResponseEntity<ErrorResponse> {
-        logger.warn("Invalid credentials attempt")
+        logger.error("Unexpected error occurred", ex)
         val errorResponse = ErrorResponse(
             timestamp = LocalDateTime.now(),
-            status = HttpStatus.UNAUTHORIZED.value(),
-            error = "Unauthorized",
-            message = "Invalid email or password",
+            status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            error = "Internal Server Error",
+            message = "An unexpected error occurred. Please try again later.",
             path = request.getDescription(false).removePrefix("uri=")
         )
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse)
-    }
-
-    @ExceptionHandler(UnauthorizedAccessException::class, AccessDeniedException::class)
-    fun handleUnauthorizedException(
-        ex: Exception,
-        request: WebRequest
-    ): ResponseEntity<ErrorResponse> {
-        logger.warn("Unauthorized access attempt: ${ex.message}")
-        val errorResponse = ErrorResponse(
-            timestamp = LocalDateTime.now(),
-            status = HttpStatus.FORBIDDEN.value(),
-            error = "Forbidden",
-            message = "You don't have permission to access this resource",
-            path = request.getDescription(false).removePrefix("uri=")
-        )
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse)
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
@@ -73,19 +54,5 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }
 
-    @ExceptionHandler(Exception::class)
-    fun handleGlobalException(
-        ex: Exception,
-        request: WebRequest
-    ): ResponseEntity<ErrorResponse> {
-        logger.error("Unexpected error occurred", ex)
-        val errorResponse = ErrorResponse(
-            timestamp = LocalDateTime.now(),
-            status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            error = "Internal Server Error",
-            message = "An unexpected error occurred. Please try again later.",
-            path = request.getDescription(false).removePrefix("uri=")
-        )
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse)
-    }
+
 }

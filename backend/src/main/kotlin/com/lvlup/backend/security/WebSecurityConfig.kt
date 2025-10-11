@@ -28,13 +28,13 @@ class WebSecurityConfig(
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
-    @Bean
-    fun authenticationProvider(): AuthenticationProvider {
-        return DaoAuthenticationProvider().apply {
-            setUserDetailsService(userDetailsService)
-            setPasswordEncoder(passwordEncoder())
-        }
-    }
+//    @Bean
+//    fun authenticationProvider(): AuthenticationProvider {
+//        return DaoAuthenticationProvider().apply {
+//            setUserDetailsService(userDetailsService)
+//            setPasswordEncoder(passwordEncoder())
+//        }
+//    }
 
     @Bean
     fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager =
@@ -57,7 +57,7 @@ class WebSecurityConfig(
                     ).permitAll()
                     .anyRequest().authenticated()
             }
-            .authenticationProvider(authenticationProvider())
+//            .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()

@@ -65,7 +65,7 @@ class AuthenticationService(
     fun registerNewUser(request: RegisterRequest): AuthJwtResponse {
         logger.debug { "Attempting to register user with username: ${request.username}" }
 
-        require(!userRepository.existsByUsername(request.username)) {
+        if(userRepository.existsByUsername(request.username)) {
             logger.debug { "Registration failed: Email already exists - ${request.username}" }
             throw UserAlreadyExistsException("User with username ${request.username} already exists")
         }

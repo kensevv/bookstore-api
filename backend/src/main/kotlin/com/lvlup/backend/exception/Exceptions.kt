@@ -1,8 +1,10 @@
 package com.lvlup.backend.exception
 
+import jakarta.security.auth.message.AuthException
+import org.springframework.http.HttpStatus
+
 // Base exception
 sealed class BookstoreException(message: String) : RuntimeException(message)
-
 
 // Authentication exceptions
 class InvalidCredentialsException(message: String = "Invalid email or password") : BookstoreException(message)
