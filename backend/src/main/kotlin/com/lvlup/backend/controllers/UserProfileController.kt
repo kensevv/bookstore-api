@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.security.Principal
 
 @RestController
 @RequestMapping("/api/profile")
@@ -35,9 +36,10 @@ class UserProfileController(
 
     @PutMapping("/change-password")
     fun changePassword(
-        @Valid @RequestBody request: ChangePasswordRequest
+        @Valid @RequestBody request: ChangePasswordRequest,
+        principal: Principal
     ): ResponseEntity<SuccessResponse<Unit>> {
-        userProfileService.changePassword(request)
+        userProfileService.changePassword(principal.name, request)
         return ResponseEntity.ok(
             ApiResponseFactory.success(message = "Password changed successfully")
         )

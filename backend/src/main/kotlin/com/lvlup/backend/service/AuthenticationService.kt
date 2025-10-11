@@ -95,10 +95,10 @@ class AuthenticationService(
             updatedAt = createdTimestamp,
         )
 
-        userRepository.createUser(newUser)
+        val createdUser = userRepository.createUser(newUser)
         logger.info("User: ${newUser.email} registered successfully.")
 
-        val userPrincipal = UserDetailsImpl(newUser)
+        val userPrincipal = UserDetailsImpl(createdUser)
         val token = jwtTokenProvider.generateToken(userPrincipal)
         val refreshToken = jwtTokenProvider.generateToken(userPrincipal, isRefreshToken = true)
 

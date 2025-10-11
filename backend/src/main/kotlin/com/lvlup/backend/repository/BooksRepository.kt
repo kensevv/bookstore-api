@@ -145,6 +145,19 @@ class BooksRepository(private val dsl: DSLContext) {
             .execute()
     }
 
+    @Transactional
+    fun decrementStock(bookId: Long, quantity: Int): Boolean {
+        val updated = dsl.update(BOOKS)
+            .set(BOOKS.STOCK, BOOKS.STOCK.minus(quantity))
+            .set(BOOKS.UPDATED_AT, LocalDateTime.now())
+            .where(BOOKS.ID.eq(bookId)
+                .and(BOOKS.STOCK.ge(quantity))
+                .and(BOOKS.DELETED.isFalse))
+            .execute()
+
+        return updated > 0
+    }
+
     private fun mapRecordToBookModel(
         resultRecord: Record,
     ): Book {

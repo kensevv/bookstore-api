@@ -18,8 +18,8 @@ class UserRepository(private var db: DSLContext) {
     fun existsUserByEmail(email: String): Boolean = fetchOneUserRecordByEmail(email) != null
 
     @Transactional
-    fun createUser(user: User): Int {
-        val record = db.newRecord(USERS).apply {
+    fun createUser(user: User): User {
+        return db.newRecord(USERS).apply {
             email = user.email
             firstName = user.firstName
             lastName = user.lastName
@@ -27,8 +27,10 @@ class UserRepository(private var db: DSLContext) {
             createdAt = user.createdAt
             updatedAt = user.updatedAt
             role = user.role.name
+        }.let {newUserRecord ->
+            newUserRecord.store()
+            newUserRecord.mapToUser()
         }
-        return record.store()
     }
 
     @Transactional

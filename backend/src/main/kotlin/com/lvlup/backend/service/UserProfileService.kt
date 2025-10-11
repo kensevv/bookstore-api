@@ -22,8 +22,8 @@ class UserProfileService(
     fun getCurrentUserDto() = UserResponse(authenticationService.fetchCurrentlySignedInUser())
 
     @Transactional
-    fun changePassword(changePasswordRequest: ChangePasswordRequest) {
-        val currentUser = authenticationService.fetchCurrentlySignedInUser()
+    fun changePassword(userEmail: String, changePasswordRequest: ChangePasswordRequest) {
+        val currentUser = userRepository.findUserByEmail(userEmail) ?: throw UserNotFoundException()
         logger.info("Password change request for user: ${currentUser.email}")
 
         if (!passwordEncoder.matches(changePasswordRequest.currentPassword, currentUser.passwordHash)) {
