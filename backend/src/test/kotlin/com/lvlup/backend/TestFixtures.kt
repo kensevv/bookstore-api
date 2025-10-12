@@ -5,6 +5,8 @@ import com.lvlup.backend.dto.CategoryRequest
 import com.lvlup.backend.dto.RegisterRequest
 import com.lvlup.backend.model.Book
 import com.lvlup.backend.model.Category
+import com.lvlup.backend.model.Order
+import com.lvlup.backend.model.OrderStatus
 import com.lvlup.backend.model.ShoppingCart
 import com.lvlup.backend.model.ShoppingCartItem
 import com.lvlup.backend.model.User
@@ -166,6 +168,26 @@ object TestFixtures {
             cartId = cartId,
             bookId = bookId,
             quantity = quantity,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+    }
+
+    // Order
+    fun createTestOrder(
+        id: Long?,
+        userEmail: String = "test@example.com",
+        orderNumber: String = "ORD-123456",
+        totalAmount: BigDecimal = BigDecimal("100.00"),
+        status: OrderStatus = OrderStatus.PENDING
+    ): Order {
+        return Order(
+            id = id,
+            userEmail = userEmail,
+            orderNumber = orderNumber,
+            totalAmount = totalAmount,
+            status = status,
+            shippingAddress = "123 Main Street, City, State 12345",
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
         )
