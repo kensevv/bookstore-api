@@ -7,6 +7,7 @@ import com.lvlup.backend.dto.AuthJwtResponse
 import com.lvlup.backend.dto.LoginRequest
 import com.lvlup.backend.dto.RegisterRequest
 import com.lvlup.backend.dto.UserResponse
+import com.lvlup.backend.exception.InvalidTokenException
 import com.lvlup.backend.exception.UserNotFoundException
 import com.lvlup.backend.model.UserRole
 import com.lvlup.backend.repository.UserRepository
@@ -106,6 +107,34 @@ class AuthenticationService(
             token = token,
             refreshToken = refreshToken,
             user = UserResponse(userPrincipal)
+        )
+    }
+
+    @Transactional
+    fun refreshToken(refreshToken: String): AuthJwtResponse {
+        logger.debug { "Refresh token attempt" }
+
+        if (!jwtTokenProvider.validateToken(refreshToken, isRefreshToken = true)) {
+            logger.debug { "Invalid refresh token" }
+            throw InvalidTokenException("Invalid refresh token")
+        }
+
+        val userEmail = jwtTokenProvider.getEmailFromToken(refreshToken)
+
+        val user = userRepository.findUserByEmail(userEmail)
+            ?: throw UserNotFoundException("User not found with email: $userEmail")
+
+        val userDetails = UserDetailsImpl(user)
+
+        val newToken = jwtTokenProvider.generateToken(userDetails)
+        val newRefreshToken = jwtTokenProvider.generateToken(userDetails, isRefreshToken = true)
+
+        logger.info { "Token refreshed successfully for user: $userEmail" }
+
+        return AuthJwtResponse(
+            token = newToken,
+            refreshToken = newRefreshToken,
+            user = UserResponse(userDetails)
         )
     }
 

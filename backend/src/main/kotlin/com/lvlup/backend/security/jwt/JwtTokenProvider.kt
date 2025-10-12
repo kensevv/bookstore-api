@@ -22,13 +22,18 @@ class JwtTokenProvider(
     @Value("\${jwt.token.expiration}") private val jwtExpirationMs: String,
     @Value("\${jwt.refreshtoken.expiration}") private val jwtRefreshExpirationMs: String,
 ) {
+    companion object {
+        const val ACCESS_TOKEN_TYPE = "token"
+        const val REFRESH_TOKEN_TYPE = "refresh_token"
+    }
 
     private val logger = KotlinLogging.logger {}
 
     private val key = lazy { Keys.hmacShaKeyFor(secret.toByteArray()) }
 
-    fun validateToken(token: String): Boolean = runCatching {
-        !isTokenExpired(token)
+    fun validateToken(token: String, isRefreshToken: Boolean = false): Boolean = runCatching {
+        val tokenType = if (isRefreshToken) REFRESH_TOKEN_TYPE else ACCESS_TOKEN_TYPE
+        !isTokenExpired(token) && getTokenTypeFromToken(token) == tokenType
     }.onFailure { exception ->
         when (exception) {
             is SecurityException -> logger.error("Invalid JWT signature", exception)
@@ -41,9 +46,9 @@ class JwtTokenProvider(
 
     fun generateToken(userDetails: UserDetailsImpl, isRefreshToken: Boolean = false): String =
         doGenerateToken(
-            mapOf("role" to listOf(userDetails.getUserRole())),
-            userDetails.username,
-            if (isRefreshToken) jwtRefreshExpirationMs.toLong() else jwtExpirationMs.toLong()
+            userDetails,
+            if (isRefreshToken) jwtRefreshExpirationMs.toLong() else jwtExpirationMs.toLong(),
+            if (isRefreshToken) REFRESH_TOKEN_TYPE else ACCESS_TOKEN_TYPE
         )
 
     fun getEmailFromToken(token: String): String = runCatching {
@@ -53,12 +58,16 @@ class JwtTokenProvider(
         throw InvalidTokenException("Invalid token")
     }
 
-    private fun doGenerateToken(claims: Map<String, Any>, email: String, expirationTime: Long): String {
+    private fun doGenerateToken(userDetails: UserDetailsImpl, expirationTime: Long, tokenType: String): String {
         val createdDate = LocalDateTime.now()
         val expirationDate = createdDate.plusSeconds(expirationTime)
+        val claims = mapOf(
+            "role" to listOf(userDetails.getUserRole()),
+            "tokenType" to tokenType,
+        )
         return Jwts.builder()
             .setClaims(claims)
-            .setSubject(email)
+            .setSubject(userDetails.username)
             .setIssuedAt(Date.from(createdDate.atZone(ZoneId.systemDefault()).toInstant()))
             .setExpiration(Date.from(expirationDate.atZone(ZoneId.systemDefault()).toInstant()))
             .signWith(key.value)
@@ -68,6 +77,9 @@ class JwtTokenProvider(
     private fun getAllClaimsFromToken(token: String?): Claims =
         Jwts.parserBuilder().setSigningKey(key.value).build().parseClaimsJws(token).body
 
+    fun getTokenTypeFromToken(token: String): String {
+        return getAllClaimsFromToken(token).get("tokenType", String::class.java)
+    }
 
     private fun getExpirationDateFromToken(token: String): Date = runCatching {
         getAllClaimsFromToken(token).expiration
