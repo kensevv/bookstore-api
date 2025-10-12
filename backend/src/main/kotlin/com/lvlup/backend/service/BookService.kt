@@ -130,7 +130,7 @@ class BookService(
             maxPrice
         )
 
-        val totalPages = if (totalElements == 0) 0 else (totalElements + validatedSize - 1) / validatedSize
+        val totalPages = if (totalElements == 0L) 0 else (totalElements + validatedSize - 1) / validatedSize
 
         return PaginatedDataResponse(
             data = books,

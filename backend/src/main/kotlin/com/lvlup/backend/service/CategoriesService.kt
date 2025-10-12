@@ -8,7 +8,6 @@ import com.lvlup.backend.model.Category
 import com.lvlup.backend.repository.BooksRepository
 import com.lvlup.backend.repository.CategoriesRepository
 import mu.KotlinLogging
-import org.jooq.DSLContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,7 +17,6 @@ import java.time.LocalDateTime
 class CategoriesService(
     private val categoriesRepository: CategoriesRepository,
     private val booksRepository: BooksRepository,
-    private val dsl: DSLContext
 ) {
 
     private val logger = KotlinLogging.logger {}

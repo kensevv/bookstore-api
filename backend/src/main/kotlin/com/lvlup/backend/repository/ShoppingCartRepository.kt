@@ -106,6 +106,13 @@ class ShoppingCartRepository(private val dsl: DSLContext) {
             .execute()
     }
 
+    @Transactional
+    fun clearCart(cartId: Long) {
+        dsl.deleteFrom(SHOPPING_CARTS_ITEMS)
+            .where(SHOPPING_CARTS_ITEMS.CART_ID.eq(cartId))
+            .execute()
+    }
+
     private fun ShoppingCartsRecord.mapToCart(): ShoppingCart {
         return ShoppingCart(
             id = id,

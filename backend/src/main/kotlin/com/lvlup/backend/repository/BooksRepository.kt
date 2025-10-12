@@ -6,6 +6,7 @@ import com.lvlup.bookstore.jooq.tables.Books.Companion.BOOKS
 import com.lvlup.bookstore.jooq.tables.Categories.Companion.CATEGORIES
 import com.lvlup.bookstore.jooq.tables.records.BooksRecord
 import com.lvlup.bookstore.jooq.tables.records.CategoriesRecord
+import com.lvlup.bookstore.jooq.tables.references.ORDERS
 import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Record
@@ -63,9 +64,12 @@ class BooksRepository(private val dsl: DSLContext) {
         categoryId: Long? = null,
         minPrice: BigDecimal? = null,
         maxPrice: BigDecimal? = null
-    ): Int {
+    ): Long {
         val conditions = buildBooksSearchCondition(title, author, categoryId, minPrice, maxPrice)
-        return dsl.fetchCount(BOOKS, conditions)
+        return dsl.selectCount()
+            .from(BOOKS)
+            .where(conditions)
+            .fetchOne(0, Long::class.java) ?: 0L
     }
 
     private fun buildBooksSearchCondition(
@@ -150,9 +154,12 @@ class BooksRepository(private val dsl: DSLContext) {
         val updated = dsl.update(BOOKS)
             .set(BOOKS.STOCK, BOOKS.STOCK.minus(quantity))
             .set(BOOKS.UPDATED_AT, LocalDateTime.now())
-            .where(BOOKS.ID.eq(bookId)
-                .and(BOOKS.STOCK.ge(quantity))
-                .and(BOOKS.DELETED.isFalse))
+            .where(
+                BOOKS.ID.eq(bookId)
+                    // conditional update for concurrent orders
+                    .and(BOOKS.STOCK.ge(quantity))
+                    .and(BOOKS.DELETED.isFalse)
+            )
             .execute()
 
         return updated > 0
