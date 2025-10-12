@@ -27,6 +27,7 @@ class UserRepository(private var db: DSLContext) {
             createdAt = user.createdAt
             updatedAt = user.updatedAt
             role = user.role.name
+            deleted = false
         }.let {newUserRecord ->
             newUserRecord.store()
             newUserRecord.mapToUser()
