@@ -57,6 +57,7 @@ dependencies {
 
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
     implementation("org.springdoc:springdoc-openapi-starter-common:2.8.13")
+    testImplementation(kotlin("test"))
 }
 
 tasks.withType<KotlinCompile> {

@@ -177,7 +177,7 @@ object TestFixtures {
     fun createTestOrder(
         id: Long?,
         userEmail: String = "test@example.com",
-        orderNumber: String = "ORD-123456",
+        orderNumber: String = "ORD-123-${System.currentTimeMillis()}",
         totalAmount: BigDecimal = BigDecimal("100.00"),
         status: OrderStatus = OrderStatus.PENDING
     ): Order {

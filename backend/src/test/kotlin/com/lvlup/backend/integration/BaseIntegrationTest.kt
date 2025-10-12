@@ -1,18 +1,17 @@
 package com.lvlup.backend.integration
 
-import com.lvlup.bookstore.jooq.tables.Books
 import com.lvlup.bookstore.jooq.tables.ShoppingCarts.Companion.SHOPPING_CARTS
 import com.lvlup.bookstore.jooq.tables.references.BOOKS
 import com.lvlup.bookstore.jooq.tables.references.CATEGORIES
+import com.lvlup.bookstore.jooq.tables.references.ORDERS
+import com.lvlup.bookstore.jooq.tables.references.ORDER_ITEMS
 import com.lvlup.bookstore.jooq.tables.references.SHOPPING_CARTS_ITEMS
 import com.lvlup.bookstore.jooq.tables.references.USERS
 import org.jooq.DSLContext
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -23,6 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Testcontainers
+@Tag("integrationTest")
 abstract class BaseIntegrationTest {
 
     @Autowired
@@ -30,6 +30,8 @@ abstract class BaseIntegrationTest {
 
     @BeforeEach
     fun cleanDatabase() {
+        dsl.deleteFrom(ORDER_ITEMS).execute()
+        dsl.deleteFrom(ORDERS).execute()
         dsl.deleteFrom(SHOPPING_CARTS_ITEMS).execute()
         dsl.deleteFrom(SHOPPING_CARTS).execute()
         dsl.deleteFrom(BOOKS).execute()
@@ -55,4 +57,5 @@ abstract class BaseIntegrationTest {
             registry.add("spring.liquibase.default-schema") { "bookstore" }
         }
     }
+
 }

@@ -11,7 +11,6 @@ import com.lvlup.backend.repository.CategoriesRepository
 import com.lvlup.backend.repository.UserRepository
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -267,7 +266,7 @@ class EndToEndUserJourneyTest(
             .andReturn()
 
         val categoryId = objectMapper.readTree(categoryResult.response.contentAsString)
-            .get("id").asLong()
+            .get("data").get("id").asLong()
 
         logger.info(" Created category with ID: $categoryId")
 
@@ -289,7 +288,7 @@ class EndToEndUserJourneyTest(
             .andReturn()
 
         val bookId = objectMapper.readTree(bookResult.response.contentAsString)
-            .get("id").asLong()
+            .get("data").get("id").asLong()
 
         logger.info(" Created book with ID: $bookId")
 
@@ -320,7 +319,7 @@ class EndToEndUserJourneyTest(
                 .header("Authorization", "Bearer $adminToken")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.data.orders").isArray)
+            .andExpect(jsonPath("$.data.data").isArray)
 
         logger.info(" Viewed all orders")
 
