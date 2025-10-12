@@ -9,6 +9,7 @@ import com.lvlup.backend.exception.CartNotFoundException
 import com.lvlup.backend.exception.InsufficientStockException
 import com.lvlup.backend.exception.ResourceNotFoundException
 import com.lvlup.backend.exception.UnauthorizedAccessException
+import com.lvlup.backend.model.Book
 import com.lvlup.backend.model.ShoppingCart
 import com.lvlup.backend.model.ShoppingCartItem
 import com.lvlup.backend.repository.BooksRepository
@@ -70,43 +71,53 @@ class ShoppingCartService(
         val book = bookRepository.findBookById(request.bookId)
             ?: throw BookNotFoundException("Book not found with ID: ${request.bookId}. Can't add to cart.")
 
-        // stock availability
-        if (book.stock < request.quantity) {
-            throw InsufficientStockException(
-                "Insufficient stock for book '${book.title}'. Available: ${book.stock}, Requested: ${request.quantity}"
-            )
-        }
+        validateStockAvailability(book, request.quantity)
 
         val shoppingCart = getOrCreateUsersShoppingCart(userEmail)
+        val existingItem = cartRepository.findCartItemByBookId(shoppingCart.id!!, request.bookId)
 
-        val existingItemInCart = cartRepository.findCartItemByBookId(shoppingCart.id!!, request.bookId)
-
-        if (existingItemInCart != null) {
-            val newQuantity = existingItemInCart.quantity + request.quantity
-
-            if (book.stock < newQuantity) {
-                throw InsufficientStockException(
-                    "Insufficient stock for book '${book.title}'. Available: ${book.stock}, Current in cart: ${existingItemInCart.quantity}, Requested to add: ${request.quantity}"
-                )
-            }
-
-            cartRepository.updateCartItemQuantity(existingItemInCart.id!!, newQuantity)
-            logger.info("Updated cart item quantity to $newQuantity")
+        if (existingItem != null) {
+            updateExistingCartItem(existingItem, book, request.quantity)
         } else {
-            val createdAt = LocalDateTime.now()
-            val cartItem = ShoppingCartItem(
-                id = null,
-                cartId = shoppingCart.id,
-                bookId = request.bookId,
-                quantity = request.quantity,
-                createdAt = createdAt,
-                updatedAt = createdAt
-            )
-            cartRepository.addNewCartItem(cartItem)
-            logger.info("Added new item to cart")
+            addNewCartItem(shoppingCart.id, request)
         }
 
         return getUserCartAndRemoveInvalidItems(userEmail)
+    }
+
+    private fun validateStockAvailability(book: Book, requestedQuantity: Int) {
+        if (book.stock < requestedQuantity) {
+            throw InsufficientStockException(
+                "Insufficient stock for book '${book.title}'. Available: ${book.stock}, Requested: $requestedQuantity"
+            )
+        }
+    }
+
+    private fun updateExistingCartItem(existingItem: ShoppingCartItem, book: Book, addedQuantity: Int) {
+        val newQuantity = existingItem.quantity + addedQuantity
+        if (book.stock < newQuantity) {
+            throw InsufficientStockException(
+                "Insufficient stock for book '${book.title}'. Available: ${book.stock}, " +
+                        "Current in cart: ${existingItem.quantity}, Requested to add: $addedQuantity"
+            )
+        }
+
+        cartRepository.updateCartItemQuantity(existingItem.id!!, newQuantity)
+        logger.info("Updated cart item quantity to $newQuantity")
+    }
+
+    private fun addNewCartItem(cartId: Long, request: AddToCartRequest) {
+        val createdAt = LocalDateTime.now()
+        val cartItem = ShoppingCartItem(
+            id = null,
+            cartId = cartId,
+            bookId = request.bookId,
+            quantity = request.quantity,
+            createdAt = createdAt,
+            updatedAt = createdAt
+        )
+        cartRepository.addNewCartItem(cartItem)
+        logger.info("Added new item to cart")
     }
 
     @Transactional
