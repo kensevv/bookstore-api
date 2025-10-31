@@ -1,5 +1,6 @@
 package com.lvlup.backend.service
 
+import com.lvlup.backend.beans.RedisCacheNames
 import com.lvlup.backend.dto.CategoryRequest
 import com.lvlup.backend.exception.CategoryNotFoundException
 import com.lvlup.backend.exception.DuplicateResourceException
@@ -8,6 +9,10 @@ import com.lvlup.backend.model.Category
 import com.lvlup.backend.repository.BooksRepository
 import com.lvlup.backend.repository.CategoriesRepository
 import mu.KotlinLogging
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,11 +22,13 @@ import java.time.LocalDateTime
 class CategoriesService(
     private val categoriesRepository: CategoriesRepository,
     private val booksRepository: BooksRepository,
+    private val redisTemplate: RedisTemplate<String, Any>,
 ) {
 
     private val logger = KotlinLogging.logger {}
 
     @Transactional(readOnly = true)
+    @Cacheable(value = [RedisCacheNames.CATEGORY], key = "#id")
     fun getCategoryById(id: Long): Category {
         logger.debug("Fetching category with ID: $id")
 
@@ -58,11 +65,22 @@ class CategoriesService(
         val createdCategory = categoriesRepository.createCategory(category)
         logger.info("Category created successfully with ID: ${createdCategory.id}")
 
+        redisTemplate.opsForValue().set(
+            "category:${createdCategory.id}",
+            createdCategory,
+        )
+
         return createdCategory
     }
 
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
+    @Caching(
+        evict = [
+            CacheEvict(value = [RedisCacheNames.CATEGORY], key = "#id"),
+            CacheEvict(value = [RedisCacheNames.BOOKS, RedisCacheNames.BOOK], allEntries = true),
+        ]
+    )
     fun updateCategory(id: Long, updateRequest: CategoryRequest): Category {
         logger.info("Updating category with ID: $id")
 
@@ -90,6 +108,7 @@ class CategoriesService(
 
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = [RedisCacheNames.CATEGORY], key = "#categoryId")
     fun deleteCategory(categoryId: Long): Category {
         logger.info("Attempting to delete category with ID: $categoryId")
 

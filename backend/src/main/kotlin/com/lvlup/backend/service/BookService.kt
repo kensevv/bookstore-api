@@ -1,5 +1,6 @@
 package com.lvlup.backend.service
 
+import com.lvlup.backend.beans.RedisCacheNames
 import com.lvlup.backend.dto.PaginatedDataResponse
 import com.lvlup.backend.dto.BookRequest
 import com.lvlup.backend.exception.BookNotFoundException
@@ -8,6 +9,10 @@ import com.lvlup.backend.model.Book
 import com.lvlup.backend.repository.BooksRepository
 import com.lvlup.backend.repository.CategoriesRepository
 import mu.KotlinLogging
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -16,11 +21,13 @@ import java.time.LocalDateTime
 @Service
 class BookService(
     private val bookRepository: BooksRepository,
-    private val categoryRepository: CategoriesRepository
+    private val categoryRepository: CategoriesRepository,
 ) {
     private val logger = KotlinLogging.logger {}
 
     @Transactional
+    @CacheEvict(value = [RedisCacheNames.BOOKS], allEntries = true)
+    @CachePut(value = [RedisCacheNames.BOOK], key = "#result.id")
     fun createBook(request: BookRequest): Book {
         logger.info("Creating new book: ${request.title}")
 
@@ -49,6 +56,12 @@ class BookService(
     }
 
     @Transactional
+    @Caching(
+        evict = [
+            CacheEvict(value = [RedisCacheNames.BOOK], key = "#id"),
+            CacheEvict(value = [RedisCacheNames.BOOKS], allEntries = true)
+        ]
+    )
     fun updateBook(id: Long, request: BookRequest): Book {
         logger.info("Updating book with ID: $id")
 
@@ -77,6 +90,12 @@ class BookService(
     }
 
     @Transactional
+    @Caching(
+        evict = [
+            CacheEvict(value = [RedisCacheNames.BOOK], key = "#id"),
+            CacheEvict(value = [RedisCacheNames.BOOKS], allEntries = true)
+        ]
+    )
     fun deleteBook(id: Long) {
         logger.info("Deleting book with ID: $id")
 
@@ -88,6 +107,7 @@ class BookService(
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = [RedisCacheNames.BOOK], key = "#id")
     fun getBookById(id: Long): Book {
         logger.debug("Fetching book with ID: $id")
 
@@ -98,6 +118,10 @@ class BookService(
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(
+        value = [RedisCacheNames.BOOKS],
+        key = "T(String).format('%d_%d_%s_%s_%s_%s_%s', #page, #size, #title, #author, #categoryId, #minPrice, #maxPrice)",
+    )
     fun getAllBooksPaginated(
         page: Int,
         size: Int,

@@ -25,8 +25,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
 //    runtimeOnly("com.oracle.database.jdbc:ojdbc8")
     runtimeOnly("org.postgresql:postgresql:42.7.7")
+
 
     implementation("org.jooq:jooq:3.19.13")
     implementation("org.jooq:jooq-kotlin:3.19.13")
