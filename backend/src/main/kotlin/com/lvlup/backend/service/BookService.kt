@@ -1,11 +1,11 @@
 package com.lvlup.backend.service
 
-import com.lvlup.backend.beans.RedisCacheNames
 import com.lvlup.backend.dto.PaginatedDataResponse
 import com.lvlup.backend.dto.BookRequest
 import com.lvlup.backend.exception.BookNotFoundException
 import com.lvlup.backend.exception.CategoryNotFoundException
 import com.lvlup.backend.model.Book
+import com.lvlup.backend.redis.RedisCacheNames
 import com.lvlup.backend.repository.BooksRepository
 import com.lvlup.backend.repository.CategoriesRepository
 import mu.KotlinLogging
@@ -57,8 +57,10 @@ class BookService(
 
     @Transactional
     @Caching(
+        put = [
+            CachePut(value = [RedisCacheNames.BOOK], key = "#result.id"),
+        ],
         evict = [
-            CacheEvict(value = [RedisCacheNames.BOOK], key = "#id"),
             CacheEvict(value = [RedisCacheNames.BOOKS], allEntries = true)
         ]
     )
