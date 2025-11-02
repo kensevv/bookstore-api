@@ -6,7 +6,7 @@ sealed class BookstoreException(message: String) : RuntimeException(message)
 
 // Resource not found exceptions
 open class ResourceNotFoundException(message: String) : BookstoreException(message)
-class UserNotFoundException(message: String = "User not found") : ResourceNotFoundException(message)
+
 class BookNotFoundException(message: String = "Book not found") : ResourceNotFoundException(message)
 class CategoryNotFoundException(message: String = "Category not found") : ResourceNotFoundException(message)
 class OrderNotFoundException(message: String = "Order not found") : ResourceNotFoundException(message)
