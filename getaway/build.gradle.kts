@@ -30,7 +30,9 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    implementation("org.springframework.cloud:spring-cloud-starter-gateway-server-webflux:4.3.2")
+    implementation("org.springframework.cloud:spring-cloud-starter-gateway:4.3.2")
+
+    implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
 
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")

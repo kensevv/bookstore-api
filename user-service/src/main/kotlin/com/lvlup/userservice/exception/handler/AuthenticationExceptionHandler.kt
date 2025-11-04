@@ -1,6 +1,6 @@
 package com.lvlup.userservice.exception.handler
 
-import com.lvlup.commonspring.exception.InvalidTokenException
+import exception.InvalidTokenException
 import com.lvlup.userservice.exception.InvalidCredentialsException
 import com.lvlup.userservice.exception.UnauthorizedAccessException
 import com.lvlup.userservice.exception.UserAlreadyExistsException

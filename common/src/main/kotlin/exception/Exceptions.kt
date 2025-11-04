@@ -1,4 +1,4 @@
-package com.lvlup.commonspring.exception
+package exception
 
 
 // Base exception

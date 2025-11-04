@@ -1,8 +1,8 @@
 package com.lvlup.userservice.exception
 
-import com.lvlup.commonspring.exception.BookstoreException
-import com.lvlup.commonspring.exception.DuplicateResourceException
-import com.lvlup.commonspring.exception.ResourceNotFoundException
+import exception.BookstoreException
+import exception.DuplicateResourceException
+import exception.ResourceNotFoundException
 
 // Authentication exceptions
 class InvalidCredentialsException(message: String = "Invalid email or password") : BookstoreException(message)

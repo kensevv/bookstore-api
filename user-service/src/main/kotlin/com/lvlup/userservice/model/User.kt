@@ -16,7 +16,7 @@ enum class UserRole {
 
 @Entity
 @Table(name = "users")
-data class User(
+class User(
     @Id var email: String,
 
     @Column(nullable = false) var firstName: String,

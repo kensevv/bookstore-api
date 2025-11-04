@@ -1,6 +1,6 @@
 package com.lvlup.userservice.service
 
-import com.lvlup.commonspring.exception.InvalidTokenException
+import exception.InvalidTokenException
 import com.lvlup.userservice.dto.AuthJwtResponse
 import com.lvlup.userservice.dto.LoginRequest
 import com.lvlup.userservice.dto.RegisterRequest

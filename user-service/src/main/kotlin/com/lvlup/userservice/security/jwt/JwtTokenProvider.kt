@@ -1,11 +1,10 @@
 package com.lvlup.userservice.security.jwt
 
-import com.lvlup.commonspring.exception.InvalidTokenException
+import exception.InvalidTokenException
 import com.lvlup.userservice.security.principle.UserDetailsImpl
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.Jwts.claims
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.security.Keys

@@ -1,6 +1,6 @@
 package com.lvlup.getaway.auth
 
-import com.lvlup.commonspring.exception.InvalidTokenException
+import exception.InvalidTokenException
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
