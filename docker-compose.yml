@@ -1,9 +1,9 @@
 version: '3.8'
 services:
   # PostgreSQL - Main Database
-  postgres-db:
+  user-service-db:
     image: postgres:15
-    container_name: bookstore-postgres
+    container_name: bookstore-user-db
     environment:
       - POSTGRES_DB=bookstore
       - POSTGRES_USER=bookstore
@@ -11,13 +11,31 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - user_postgres_data:/var/lib/postgresql/data
       - ./database/init-scripts:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U bookstore"]
       interval: 10s
       timeout: 5s
       retries: 5
+  inventory-service-db:
+    image: postgres:15
+    container_name: bookstore-inventory-db
+    environment:
+      - POSTGRES_DB=bookstore
+      - POSTGRES_USER=bookstore
+      - POSTGRES_PASSWORD=bookstore123
+    ports:
+      - "5433:5432"
+    volumes:
+      - inventory_postgres_data:/var/lib/postgresql/data
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U bookstore" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Redis
   redis:
     image: redis:7-alpine
@@ -34,5 +52,6 @@ services:
       retries: 5
 
 volumes:
-  postgres_data:
+  user_postgres_data:
+  inventory_postgres_data:
   redis_data:

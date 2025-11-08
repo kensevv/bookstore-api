@@ -20,10 +20,8 @@ repositories {
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":jooq-db"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-jooq")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
@@ -32,11 +30,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
     runtimeOnly("org.postgresql:postgresql:42.7.7")
-
-    implementation("org.jooq:jooq:3.19.13")
-    implementation("org.jooq:jooq-kotlin:3.19.13")
-
-    implementation("org.liquibase:liquibase-core")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
 
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")

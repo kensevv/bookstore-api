@@ -6,5 +6,4 @@ include(
     "inventory-service",
 //    "order-service",
     "common",
-    "jooq-db",
 )
