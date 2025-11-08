@@ -12,7 +12,7 @@ class HealthController {
     fun health(): Map<String, String> {
         return mapOf(
             "status" to "UP",
-            "service" to "notification-service"
+            "service" to "inventory-service"
         )
     }
 }

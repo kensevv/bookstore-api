@@ -123,7 +123,7 @@ class CategoriesService(
             CategoryNotFoundException("Category not found with ID: $categoryId")
         }
 
-        val bookCount = booksRepository.getBooksCount(categoryId = categoryId)
+        val bookCount = booksRepository.countByCategoryId(categoryId)
 
         if (bookCount > 0) {
             logger.warn("Category deletion failed: Category ${category.name} has $bookCount associated books")

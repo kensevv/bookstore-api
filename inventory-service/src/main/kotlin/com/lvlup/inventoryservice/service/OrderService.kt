@@ -8,17 +8,17 @@ import com.lvlup.inventoryservice.exception.EmptyCartException
 import com.lvlup.inventoryservice.exception.InsufficientStockException
 import com.lvlup.inventoryservice.exception.InvalidOperationException
 import com.lvlup.inventoryservice.exception.OrderNotFoundException
-import com.lvlup.inventoryservice.exception.UnauthorizedAccessException
 import com.lvlup.inventoryservice.model.Book
 import com.lvlup.inventoryservice.model.Order
-import com.lvlup.inventoryservice.model.OrderItem
 import com.lvlup.inventoryservice.model.OrderStatus
 import com.lvlup.inventoryservice.model.ShoppingCart
 import com.lvlup.inventoryservice.repository.BooksRepository
 import com.lvlup.inventoryservice.repository.OrderRepository
+import com.lvlup.inventoryservice.repository.ShoppingCartItemRepository
 import com.lvlup.inventoryservice.repository.ShoppingCartRepository
 import dto.PaginatedDataResponse
 import mu.KotlinLogging
+import org.springframework.data.domain.PageRequest
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -30,6 +30,7 @@ import kotlin.collections.map
 class OrderService(
     private val orderRepository: OrderRepository,
     private val cartRepository: ShoppingCartRepository,
+    private val cartItemRepository: ShoppingCartItemRepository,
     private val bookRepository: BooksRepository,
 ) {
 
@@ -39,75 +40,61 @@ class OrderService(
     fun createUserOrder(userEmail: String, request: CreateOrderRequest): OrderResponse {
         logger.info("Creating shopping cart order for user $userEmail")
 
-        val userShoppingCart = cartRepository.findCartByUserEmail(userEmail)
-            ?: throw EmptyCartException()
+        val userShoppingCart = cartRepository.findByUserEmail(userEmail)
 
-        val shoppingCartOrderItemsData = validateCartAndGetItems(userShoppingCart)
-
-        val createdAt = LocalDateTime.now()
-
-        val savedOrder = createAndSaveOrder(userEmail, shoppingCartOrderItemsData, request.shippingAddress, createdAt)
-
-        processOrderItemsAndHandleStock(shoppingCartOrderItemsData, savedOrder, createdAt)
-
-        cartRepository.clearCart(userShoppingCart.id!!)
-
-        logger.info("Order placement completed successfully: ${savedOrder.orderNumber}")
-
-        return getUserOrderById(savedOrder.id!!, userEmail)
-    }
-
-    private fun processOrderItemsAndHandleStock(
-        shoppingCartOrderItemsData: List<Triple<Long, Int, BigDecimal>>,
-        savedOrder: Order,
-        createdAt: LocalDateTime
-    ) {
-        shoppingCartOrderItemsData.forEach { (bookId, quantity, price) ->
-            // Save order item
-            orderRepository.saveOrderItem(
-                OrderItem(
-                    id = null,
-                    orderId = savedOrder.id!!,
-                    bookId = bookId,
-                    quantity = quantity,
-                    priceAtPurchase = price,
-                    createdAt = createdAt
-                )
-            )
-
-            // Deduct stock
-            val stockDeducted = bookRepository.decrementStock(bookId, quantity) // conditional update
-            if (!stockDeducted) {
-                throw InsufficientStockException(
-                    "Failed to deduct stock for book ID: $bookId. Concurrent stock issue."
-                )
-            }
-        }
-    }
-
-
-    private fun validateCartAndGetItems(cart: ShoppingCart): List<Triple<Long, Int, BigDecimal>> {
-
-        val cartItems = cartRepository.findAllCartItemsAndTheirBooks(cart.id!!)
-
-        if (cartItems.isEmpty()) {
+        if (userShoppingCart == null || userShoppingCart.items.isEmpty()) {
             throw EmptyCartException("Cannot create order from empty cart")
         }
 
-        // Validate all items, check stock
-        val orderItemsData = cartItems.map { (cartItem, book) ->
-            if (book == null) {
-                throw BookNotFoundException("Book with ID ${cartItem.bookId} not found")
+        // Validate cart items and prepare order data
+        val orderItemsData = validateCartAndGetItems(userShoppingCart)
+
+        val createdAt = LocalDateTime.now()
+        val savedOrder = createAndSaveOrder(userEmail, orderItemsData, request.shippingAddress, createdAt)
+
+        processOrderItemsAndHandleStock(orderItemsData, savedOrder, createdAt)
+
+        userShoppingCart.clearItems()
+        cartRepository.save(userShoppingCart)
+
+        logger.info("Order placement completed successfully: ${savedOrder.orderNumber}")
+
+        return mapToOrderResponse(savedOrder)
+    }
+
+    private fun processOrderItemsAndHandleStock(
+        shoppingCartOrderItemsData: List<Triple<Book, Int, BigDecimal>>,
+        savedOrder: Order,
+        createdAt: LocalDateTime
+    ) {
+        shoppingCartOrderItemsData.forEach { (book, quantity, price) ->
+            savedOrder.addOrderItem(book, quantity, price, createdAt)
+
+            // Deduct stock
+            val rowsAffected = bookRepository.decrementStock(book.id!!, quantity, createdAt) // conditional update
+            if (rowsAffected == 0) {
+                throw InsufficientStockException(
+                    "Failed to deduct stock for book ID: $book. Concurrent stock issue."
+                )
+            }
+        }
+    }
+
+
+    private fun validateCartAndGetItems(cart: ShoppingCart): List<Triple<Book, Int, BigDecimal>> {
+        val orderItemsData = cart.items.map { item ->
+            if (item.book == null) {
+                throw BookNotFoundException("Book with ID ${item.bookId} not found")
             }
 
-            if (book.stock < cartItem.quantity) {
+            if (item.book.stock < item.quantity) {
                 throw InsufficientStockException(
-                    "Insufficient stock for book '${book.title}'. " +
-                            "Available: ${book.stock}, Required: ${cartItem.quantity}"
+                    "Insufficient stock for book '${item.book.title}'. " +
+                            "Available: ${item.book.stock}, Required: ${item.quantity}"
                 )
             }
 
-            Triple(book.id!!, cartItem.quantity, book.price)
+            Triple(item.book, item.quantity, item.book.price)
         }
 
         return orderItemsData
@@ -115,13 +102,12 @@ class OrderService(
 
     private fun createAndSaveOrder(
         userEmail: String,
-        orderItemsData: List<Triple<Long, Int, BigDecimal>>,
+        orderItemsData: List<Triple<Book, Int, BigDecimal>>,
         shippingAddress: String,
         createdAt: LocalDateTime
     ): Order {
         val newOrderNumber = generateNewOrderNumber()
         val order = Order(
-            id = null,
             userEmail = userEmail,
             orderNumber = newOrderNumber,
             totalAmount = orderItemsData.sumOf { it.second.toBigDecimal() * it.third },
@@ -131,7 +117,7 @@ class OrderService(
             updatedAt = createdAt
         )
 
-        val savedOrder = orderRepository.createNewOrder(order)
+        val savedOrder = orderRepository.save(order)
         logger.info("Order created with order number: $newOrderNumber and id ${savedOrder.id}")
 
         return savedOrder
@@ -148,12 +134,8 @@ class OrderService(
     fun getUserOrderById(orderId: Long, userEmail: String): OrderResponse {
         logger.debug("Fetching order $orderId for user $userEmail")
 
-        val order = orderRepository.findOrderById(orderId)
-            ?: throw OrderNotFoundException("Order not found with ID: $orderId")
-
-        // Verify order belongs to user
-        if (order.userEmail != userEmail) {
-            throw UnauthorizedAccessException("You don't have permission to view this order")
+        val order = orderRepository.findByIdAndUserEmail(orderId, userEmail).orElseThrow {
+            OrderNotFoundException("Order not found with ID: $orderId for user $userEmail")
         }
 
         return mapToOrderResponse(order)
@@ -168,22 +150,21 @@ class OrderService(
     ): PaginatedDataResponse<OrderResponse> {
         logger.debug("Fetching orders for user $userEmail - page: $page, size: $size")
 
-        val validatedPage = maxOf(0, page)
-        val validatedSize = minOf(maxOf(1, size), 100)
+        val pageResult = orderRepository.findAllByUserEmailAndStatus(
+            userEmail,
+            status,
+            PageRequest.of(
+                maxOf(0, page),
+                minOf(maxOf(1, size), 100),
+                sortByKProperty(Order::createdAt)
+            )
 
-        val orders = orderRepository.findOrdersByUserEmail(userEmail, status, validatedPage, validatedSize)
-        val totalElements = orderRepository.countOrdersByUserEmail(userEmail)
-        val totalPages = if (totalElements == 0L) 0 else (totalElements + validatedSize - 1) / validatedSize
-
-        val orderResponses = orders.map { mapToOrderResponse(it) }
-
-        return PaginatedDataResponse(
-            data = orderResponses,
-            totalElements = totalElements,
-            totalPages = totalPages,
-            currentPage = validatedPage,
-            pageSize = validatedSize
         )
+
+        return pageResult.toPaginatedDataResponse(
+            pageResult.content.map { mapToOrderResponse(it) },
+        )
+
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -191,21 +172,18 @@ class OrderService(
     fun getAllOrdersPaginated(page: Int, size: Int, status: OrderStatus?): PaginatedDataResponse<OrderResponse> {
         logger.debug("Fetching all orders - page: $page, size: $size")
 
-        val validatedPage = maxOf(0, page)
-        val validatedSize = minOf(maxOf(1, size), 100)
+        val pageResult = orderRepository.findAllByStatus(
+            status,
+            PageRequest.of(
+                maxOf(0, page),
+                minOf(maxOf(1, size), 100),
+                sortByKProperty(Order::createdAt)
+            )
 
-        val orders = orderRepository.findAllOrders(status, validatedPage, validatedSize)
-        val totalElements = orderRepository.countAllOrders()
-        val totalPages = if (totalElements == 0L) 0 else (totalElements + validatedSize - 1) / validatedSize
+        )
 
-        val orderResponses = orders.map { mapToOrderResponse(it) }
-
-        return PaginatedDataResponse(
-            data = orderResponses,
-            totalElements = totalElements,
-            totalPages = totalPages,
-            currentPage = validatedPage,
-            pageSize = validatedSize
+        return pageResult.toPaginatedDataResponse(
+            pageResult.content.map { mapToOrderResponse(it) },
         )
     }
 
@@ -214,15 +192,17 @@ class OrderService(
     fun updateOrderStatus(orderId: Long, newStatus: OrderStatus): OrderResponse {
         logger.info("Updating order $orderId status to $newStatus")
 
-        val order = orderRepository.findOrderById(orderId)
-            ?: throw OrderNotFoundException("Order not found with ID: $orderId")
+        val order = orderRepository.findById(orderId).orElseThrow {
+            OrderNotFoundException("Order not found with ID: $orderId")
+        }
 
         validateStatusTransition(order.status, newStatus)
 
-        val updatedOrder = orderRepository.updateStatus(orderId, newStatus)
+        order.status = newStatus
+        orderRepository.save(order)
         logger.info("Order status updated successfully")
 
-        return mapToOrderResponse(updatedOrder!!)
+        return mapToOrderResponse(order!!)
     }
 
     private fun validateStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus) {
@@ -240,28 +220,27 @@ class OrderService(
     }
 
     private fun mapToOrderResponse(order: Order): OrderResponse {
-        val orderItems: List<Pair<OrderItem, Book>> = orderRepository.findOrderItemsAndTheirBooks(order.id!!)
-
-        val orderItemResponses = orderItems.map { (orderItem, book) ->
-            OrderItemResponse(
-                id = orderItem.id!!,
-                book = book,
-                quantity = orderItem.quantity,
-                priceAtPurchase = orderItem.priceAtPurchase,
-                subtotal = orderItem.priceAtPurchase * orderItem.quantity.toBigDecimal()
-            )
-        }
+        val orderItems = order.items
 
         return OrderResponse(
-            id = order.id,
+            id = order.id!!,
             orderNumber = order.orderNumber,
             userEmail = order.userEmail,
-            items = orderItemResponses,
+            items = orderItems.map { orderItem ->
+                OrderItemResponse(
+                    id = orderItem.id!!,
+                    book = orderItem.book,
+                    quantity = orderItem.quantity,
+                    priceAtPurchase = orderItem.priceAtPurchase,
+                    subtotal = orderItem.priceAtPurchase * orderItem.quantity.toBigDecimal()
+                )
+            },
             totalAmount = order.totalAmount,
             status = order.status,
             shippingAddress = order.shippingAddress,
-            createdAt = order.createdAt,
-            updatedAt = order.updatedAt
+            createdAt = order.createdAt!!,
+            updatedAt = order.updatedAt!!
         )
     }
 }
+

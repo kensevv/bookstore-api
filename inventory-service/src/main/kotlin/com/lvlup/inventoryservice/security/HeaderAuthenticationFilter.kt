@@ -17,6 +17,8 @@ class HeaderAuthenticationFilter() : OncePerRequestFilter() {
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+//        val userId = request.getHeader("X-User-Id")
+//        val role = request.getHeader("X-User-Role")
         val userId = "kenan"
         val role = "ROLE_ADMIN"
 

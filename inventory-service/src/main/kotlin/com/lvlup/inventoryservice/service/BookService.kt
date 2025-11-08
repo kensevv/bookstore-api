@@ -1,18 +1,19 @@
-package com.lvlup.backend.service
+package com.lvlup.inventoryservice.service
 
-import com.lvlup.backend.dto.PaginatedDataResponse
-import com.lvlup.backend.dto.BookRequest
-import com.lvlup.backend.exception.BookNotFoundException
-import com.lvlup.backend.exception.CategoryNotFoundException
-import com.lvlup.backend.model.Book
-import com.lvlup.backend.redis.RedisCacheNames
-import com.lvlup.backend.repository.BooksRepository
-import com.lvlup.backend.repository.CategoriesRepository
+import com.lvlup.inventoryservice.dto.BookRequest
+import com.lvlup.inventoryservice.exception.BookNotFoundException
+import com.lvlup.inventoryservice.exception.CategoryNotFoundException
+import com.lvlup.inventoryservice.model.Book
+import com.lvlup.inventoryservice.redis.RedisCacheNames
+import com.lvlup.inventoryservice.repository.BooksRepository
+import com.lvlup.inventoryservice.repository.CategoriesRepository
+import dto.PaginatedDataResponse
 import mu.KotlinLogging
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -31,12 +32,12 @@ class BookService(
     fun createBook(request: BookRequest): Book {
         logger.info("Creating new book: ${request.title}")
 
-        val selectedCategory = categoryRepository.findCategoryById(request.categoryId)
-            ?: throw CategoryNotFoundException("Category not found with ID: ${request.categoryId}")
+        val selectedCategory = categoryRepository.findById(request.categoryId).orElseThrow {
+            CategoryNotFoundException("Category not found with ID: ${request.categoryId}")
+        }
 
         val createdTimestamp = LocalDateTime.now()
         val book = Book(
-            id = null,
             title = request.title.trim(),
             author = request.author.trim(),
             description = request.description?.trim(),
@@ -46,10 +47,9 @@ class BookService(
             coverImageUrl = request.coverImageUrl?.trim(),
             createdAt = createdTimestamp,
             updatedAt = createdTimestamp,
-            deleted = false,
         )
 
-        val savedBook = bookRepository.createBook(book)
+        val savedBook = bookRepository.save(book)
         logger.info("Book created successfully with ID: ${savedBook.id}")
 
         return savedBook
@@ -67,11 +67,13 @@ class BookService(
     fun updateBook(id: Long, request: BookRequest): Book {
         logger.info("Updating book with ID: $id")
 
-        val existingBook = bookRepository.findBookById(id)
-            ?: throw BookNotFoundException("Book not found with ID: $id")
+        val existingBook = bookRepository.findById(id).orElseThrow {
+            BookNotFoundException("Book not found with ID: $id")
+        }
 
-        val selectedCategory = categoryRepository.findCategoryById(request.categoryId)
-            ?: throw CategoryNotFoundException("Category not found with ID: ${request.categoryId}")
+        val selectedCategory = categoryRepository.findById(request.categoryId).orElseThrow {
+            CategoryNotFoundException("Category not found with ID: ${request.categoryId}")
+        }
 
         val updatedBook = existingBook.copy(
             title = request.title.trim(),
@@ -83,10 +85,9 @@ class BookService(
             coverImageUrl = request.coverImageUrl?.trim()
         )
 
-        val savedBook = bookRepository.updateBook(updatedBook)
-            ?: throw BookNotFoundException("Book not found with ID: $id")
+        val savedBook = bookRepository.saveAndFlush(updatedBook)
 
-        logger.info("Book updated successfully with ID: $id")
+        logger.info("Book updated successfully with ID: ${savedBook.id}")
 
         return savedBook
     }
@@ -100,11 +101,8 @@ class BookService(
     )
     fun deleteBook(id: Long) {
         logger.info("Deleting book with ID: $id")
-
-        bookRepository.findBookById(id)
-            ?: throw BookNotFoundException("Book not found with ID: $id")
-
-        bookRepository.deleteBookById(id)
+        val deleted = bookRepository.softDeleteByIdReturningCount(id)
+        if (deleted == 0) throw BookNotFoundException("Book not found with ID: $id")
         logger.info("Book deleted successfully with ID: $id")
     }
 
@@ -113,10 +111,9 @@ class BookService(
     fun getBookById(id: Long): Book {
         logger.debug("Fetching book with ID: $id")
 
-        val book = bookRepository.findBookById(id)
-            ?: throw BookNotFoundException("Book not found with ID: $id")
-
-        return book
+        return bookRepository.findById(id).orElseThrow {
+            BookNotFoundException("Book not found with ID: $id")
+        }
     }
 
     @Transactional(readOnly = true)
@@ -135,35 +132,20 @@ class BookService(
     ): PaginatedDataResponse<Book> {
         logger.debug("Fetching books - page: $page, size: $size")
 
-        val validatedPage = maxOf(0, page)
-        val validatedSize = minOf(maxOf(1, size), 100)
-
-        val books = bookRepository.findBooksPaginated(
-            validatedPage,
-            validatedSize,
+        val pageResult = bookRepository.findAllPaginated(
             title?.trim(),
             author?.trim(),
             categoryId,
             minPrice,
-            maxPrice
+            maxPrice,
+            PageRequest.of(
+                maxOf(0, page),
+                minOf(maxOf(1, size), 100),
+                sortByKProperty(Book::title)
+            )
         )
 
-        val totalElements = bookRepository.getBooksCount(
-            title?.trim(),
-            author?.trim(),
-            categoryId,
-            minPrice,
-            maxPrice
-        )
+        return pageResult.toPaginatedDataResponse()
 
-        val totalPages = if (totalElements == 0L) 0 else (totalElements + validatedSize - 1) / validatedSize
-
-        return PaginatedDataResponse(
-            data = books,
-            totalElements = totalElements,
-            totalPages = totalPages,
-            currentPage = validatedPage,
-            pageSize = validatedSize
-        )
     }
 }
